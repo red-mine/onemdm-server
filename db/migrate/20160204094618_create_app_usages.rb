@@ -1,4 +1,4 @@
-class CreateAppUsages < ActiveRecord::Migration
+class CreateAppUsages < ActiveRecord::Migration[7.0]
   def change
     create_table :app_usages do |t|
       t.string :package_name, null: false, index: false

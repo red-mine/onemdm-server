@@ -1,4 +1,4 @@
-class CreateInstallations < ActiveRecord::Migration
+class CreateInstallations < ActiveRecord::Migration[7.0]
   def change
     create_table :installations do |t|
       t.belongs_to :device, foreign_key: true, index: true
