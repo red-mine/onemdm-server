@@ -112,13 +112,15 @@ GEM
     method_source (1.0.0)
     mini_mime (1.1.2)
     minitest (5.18.0)
-    multi_json (1.15.0)
     multi_xml (0.6.0)
     newrelic_rpm (9.1.0)
+    nio4r (2.5.9)
     nokogiri (1.14.2-x64-mingw-ucrt)
       racc (~> 1.4)
     orm_adapter (0.5.0)
     pg (1.4.6-x64-mingw-ucrt)
+    puma (5.6.5)
+      nio4r (~> 2.0)
     racc (1.6.2)
     rack (2.2.6.4)
     rack-test (2.1.0)
@@ -147,8 +149,7 @@ GEM
     responders (3.1.0)
       actionpack (>= 5.2)
       railties (>= 5.2)
-    rollbar (2.14.1)
-      multi_json
+    rollbar (3.4.0)
     rspec-core (3.12.1)
       rspec-support (~> 3.12.0)
     rspec-expectations (3.12.2)
@@ -203,6 +204,8 @@ GEM
     turbolinks-source (5.2.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
+    tzinfo-data (1.2023.3)
+      tzinfo (>= 1.0.0)
     uglifier (4.2.0)
       execjs (>= 0.3.0, < 3)
     warden (1.2.9)
@@ -212,6 +215,7 @@ GEM
       binding_of_caller (>= 0.7.2)
       railties (>= 4.0)
       sprockets-rails (>= 2.0, < 4.0)
+    webrick (1.8.1)
     zeitwerk (2.6.7)
 
 PLATFORMS
@@ -228,7 +232,8 @@ DEPENDENCIES
   jquery-rails
   newrelic_rpm
   pg
-  rollbar (~> 2.14.0)
+  puma (~> 5.2)
+  rollbar (~> 3.4)
   rspec-rails
   sass-rails (~> 5.0)
   sdoc (~> 0.4.0)
@@ -237,8 +242,10 @@ DEPENDENCIES
   spring
   therubyracer
   turbolinks
+  tzinfo-data
   uglifier (>= 1.3.0)
   web-console (~> 2.0)
+  webrick (~> 1.7)
 
 BUNDLED WITH
    2.4.10

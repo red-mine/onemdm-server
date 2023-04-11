@@ -268,5 +268,5 @@ ActiveAdmin.setup do |config|
   #
   # config.include_default_association_filters = true
 
-  config.before_filter :set_timezone_for_admin
+  # config.before_filter :set_timezone_for_admin
 end
