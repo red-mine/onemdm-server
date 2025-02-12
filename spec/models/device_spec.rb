@@ -19,7 +19,7 @@ RSpec.describe Device, type: :model do
       expect(Device.last.last_heartbeat_recd_time).not_to be_nil
     end
 
-    it "next hearbeat time" do
+    it "next heartbeat time" do
       expect(Device.last.next_heartbeat_time).not_to be_nil
     end
   end

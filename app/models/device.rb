@@ -2,17 +2,17 @@ class Device < ActiveRecord::Base
   enum status: [:active,:missing,:dead]
 
   attr_accessor :status
-  
+
   validates :unique_id, :model, :gcm_token, presence: true
   validates :unique_id, uniqueness: true
-  
+
   before_create :generate_access_token
   after_create :update_last_heartbeats_time
-  
+
   has_many :heartbeats, dependent: :destroy
   has_many :installations, dependent: :destroy
   has_many :app_usages, dependent: :nullify
-  
+
   scope :active, -> {where("last_heartbeat_recd_time > '#{Time.now.utc - ACTIVE_TIMEFRAME}'")}
   scope :missing, -> {where("last_heartbeat_recd_time < '#{Time.now.utc - ACTIVE_TIMEFRAME}'AND last_heartbeat_recd_time > '#{Time.now.utc - MISSING_TIMEFRAME}'")}
   scope :dead, -> {where("last_heartbeat_recd_time < '#{Time.now.utc - MISSING_TIMEFRAME}'")}
@@ -47,7 +47,7 @@ class Device < ActiveRecord::Base
       app_usage_data << {device_id: key[0],
                        package_name: key[1],
                        used_on: key[2],
-                       usage: value} 
+                       usage: value}
     end
     app_usage_data
   end
