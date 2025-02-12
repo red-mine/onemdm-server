@@ -16,14 +16,14 @@ ActiveAdmin.register Device do
     end
     redirect_to admin_dashboard_path, notice: "Successfully pushed app to device(s)"
   end
-  
+
   index do
     selectable_column
     id_column
     column "Status" do | device |
       status = device.status
       status_tag status.titleize, STATUS_CLASSES[status.to_sym]
-    end    
+    end
     column "Model Name",:model
     column "IMEI Number",:imei_number
     column :os_version
@@ -40,7 +40,7 @@ ActiveAdmin.register Device do
   filter :os_version
   filter :client_version
   filter :imei_number
-  
+
   scope :active
   scope :missing
   scope :dead
@@ -72,8 +72,8 @@ ActiveAdmin.register Device do
           end
         end
       end
-      
-      row "Total Usage" do 
+
+      row "Total Usage" do
         distance_of_time_in_words total_usage
       end
 

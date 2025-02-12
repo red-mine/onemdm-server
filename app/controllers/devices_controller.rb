@@ -1,5 +1,5 @@
 class DevicesController < ApplicationController
-  skip_before_filter :verify_authenticity_token
+  skip_before_action :verify_authenticity_token
   respond_to :json
 
   def create
@@ -8,10 +8,10 @@ class DevicesController < ApplicationController
     if device.save
       render json: { access_token: device.access_token,
                      next_heartbeat_time: device.next_heartbeat_time
-                   }, 
+                   },
             status: :created
     else
-      render json: { error: device.errors.full_messages }, 
+      render json: { error: device.errors.full_messages },
               status: :unprocessable_entity
     end
   end
@@ -20,7 +20,7 @@ class DevicesController < ApplicationController
 
   def device_params
     params.require(:device).permit(:model,
-                                   :unique_id, 
+                                   :unique_id,
                                    :imei_number,
                                    :gcm_token,
                                    :os_version,
