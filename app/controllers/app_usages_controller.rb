@@ -15,9 +15,8 @@ class AppUsagesController < ApplicationController
   private
 
   def app_usage_params
-    params.require(:app_usage).permit(app_usage: [:package_name,
-                                                  :usage_duration_in_seconds,
-                                                  :used_on])
-
+    params.permit(app_usage: [:package_name,
+                              :usage_duration_in_seconds,
+                              :used_on]).require(:app_usage)
   end
 end
