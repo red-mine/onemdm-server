@@ -6,7 +6,7 @@ class Installation < ActiveRecord::Base
   belongs_to :batch_installation
 
   after_create :push_apps
-  
+
   def as_json(options={})
     {
       :id => self.id,
@@ -18,10 +18,18 @@ class Installation < ActiveRecord::Base
 
   def push_apps
     if self.pushed?
-      gcm = GCM.new(GCM_KEY)
-      registration_ids = [self.device.gcm_token]
-      options = { data: {message: self.to_json }}
-      response = gcm.send(registration_ids, options)
+      fcm = FCM.new(
+        '/home/hunt/Downloads/onemdm-server-firebase-adminsdk-fbsvc-aafa0b47d3.json',
+        'onemdm-server'
+      )
+      message = {
+        'token': self.device.gcm_token,
+        'data': {
+          message: self.to_json
+        },
+      }
+      logger.debug "message #{message}"
+      response = fcm.send_v1(message)
       logger.debug "response #{response}"
     end
   end
