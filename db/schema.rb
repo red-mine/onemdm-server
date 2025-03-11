@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_03_11_054911) do
+ActiveRecord::Schema[7.0].define(version: 2025_03_11_083304) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -101,6 +101,16 @@ ActiveRecord::Schema[7.0].define(version: 2025_03_11_054911) do
     t.index ["device_id"], name: "index_installations_on_device_id"
   end
 
+  create_table "pkg_usages", force: :cascade do |t|
+    t.string "package_name", null: false
+    t.integer "usage_duration_in_seconds", null: false
+    t.date "used_on", null: false
+    t.bigint "device_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["device_id"], name: "index_pkg_usages_on_device_id"
+  end
+
   create_table "pkgs", force: :cascade do |t|
     t.string "name"
     t.string "package_name"
@@ -113,4 +123,5 @@ ActiveRecord::Schema[7.0].define(version: 2025_03_11_054911) do
   add_foreign_key "heartbeats", "devices"
   add_foreign_key "installations", "batch_installations"
   add_foreign_key "installations", "devices"
+  add_foreign_key "pkg_usages", "devices"
 end

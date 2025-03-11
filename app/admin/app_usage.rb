@@ -9,12 +9,12 @@ ActiveAdmin.register_page "App Usage" do
       app_usage_data << {device_id: key[0],
                        package_name: key[1],
                        used_on: key[2],
-                       usage: value} 
+                       usage: value}
     end
   rescue
-    
+
   end
-    
+
     panel "Usage Report" do
       table_for app_usage_data do
         column "Used On" do |app_usage|
@@ -22,7 +22,7 @@ ActiveAdmin.register_page "App Usage" do
         end
         column "Device" do |app_usage|
           device_id = app_usage[:device_id]
-          link_to device_id,admin_device_path(device_id)
+          link_to device_id, admin_device_path(device_id)
         end
         column "Package Name" do |app_usage|
           app_usage[:package_name]
@@ -31,7 +31,6 @@ ActiveAdmin.register_page "App Usage" do
           distance_of_time_in_words (app_usage[:usage])
         end
       end
-    end    
+    end
   end # content
 end
-
