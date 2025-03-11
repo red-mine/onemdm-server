@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2016_02_04_094618) do
+ActiveRecord::Schema[7.0].define(version: 2025_03_11_054911) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -99,6 +99,13 @@ ActiveRecord::Schema[7.0].define(version: 2016_02_04_094618) do
     t.datetime "updated_at", null: false
     t.index ["batch_installation_id"], name: "index_installations_on_batch_installation_id"
     t.index ["device_id"], name: "index_installations_on_device_id"
+  end
+
+  create_table "pkgs", force: :cascade do |t|
+    t.string "name"
+    t.string "package_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   add_foreign_key "app_usages", "devices"

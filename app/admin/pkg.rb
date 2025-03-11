@@ -1,4 +1,4 @@
-ActiveAdmin.register App do
+ActiveAdmin.register Pkg do
 
   permit_params :name, :package_name
 
