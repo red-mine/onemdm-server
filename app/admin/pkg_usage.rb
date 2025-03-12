@@ -1,19 +1,19 @@
 ActiveAdmin.register_page "Pkg Usage" do
 
-  menu priority: 2, label: "Pkg Usage"
-  content title: "Pkg Usage" do
-  pkg_usage_data = []
-  begin
-    pkg_usages = PkgUsage.pkg_usages_per_device_pkg_day
-    pkg_usages.each do |key,value|
-      pkg_usage_data << {device_id: key[0],
-                       package_name: key[1],
-                       used_on: key[2],
-                       usage: value}
-    end
-  rescue
+  menu priority: 2, label: "OTA Usage"
+  content title: "OTA Usage" do
+    pkg_usage_data = []
+    begin
+      pkg_usages = PkgUsage.pkg_usages_per_device_pkg_day
+      pkg_usages.each do |key,value|
+        pkg_usage_data << {device_id: key[0],
+                        package_name: key[1],
+                        used_on: key[2],
+                        usage: value}
+      end
+    rescue
 
-  end
+    end
 
     panel "Usage Report" do
       table_for pkg_usage_data do

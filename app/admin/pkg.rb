@@ -1,6 +1,11 @@
 ActiveAdmin.register Pkg do
 
+  menu priority: 3, label: "OTA Packages"
+
   permit_params :name, :package_name
+
+  index :title => "OTA Packages" do
+  end
 
 # See permitted parameters documentation:
 # https://github.com/activeadmin/activeadmin/blob/master/docs/2-resource-customization.md#setting-up-strong-parameters

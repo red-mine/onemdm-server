@@ -1,19 +1,19 @@
 ActiveAdmin.register_page "App Usage" do
 
-  menu priority: 2, label: "App Usage"
+  menu priority: 5, label: "App Usage"
   content title: "App Usage" do
-  app_usage_data = []
-  begin
-    app_usages = AppUsage.app_usages_per_device_app_day
-    app_usages.each do |key,value|
-      app_usage_data << {device_id: key[0],
-                       package_name: key[1],
-                       used_on: key[2],
-                       usage: value}
-    end
-  rescue
+    app_usage_data = []
+    begin
+      app_usages = AppUsage.app_usages_per_device_app_day
+      app_usages.each do |key,value|
+        app_usage_data << {device_id: key[0],
+                        package_name: key[1],
+                        used_on: key[2],
+                        usage: value}
+      end
+    rescue
 
-  end
+    end
 
     panel "Usage Report" do
       table_for app_usage_data do

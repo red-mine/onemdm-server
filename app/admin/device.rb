@@ -1,5 +1,7 @@
 ActiveAdmin.register Device do
 
+  menu priority: 4, label: "Devices"
+
   actions :all, except: [:edit,:new]
 
   app_data = lambda do
