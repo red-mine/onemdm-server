@@ -4,7 +4,8 @@ ActiveAdmin.register Pkg do
 
   permit_params :name, :finger_print
 
-  index :title => "OTA Packages" do
+  controller do
+    before_action { @page_title = "OTA Packages" }
   end
 
 # See permitted parameters documentation:
