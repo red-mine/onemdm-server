@@ -1,7 +1,7 @@
 FactoryGirl.define do
   factory :pkg do
     name "One MDM"
-    package_name "com.multunus.onemdm"
+    finger_print "com.multunus.onemdm"
   end
 
 end

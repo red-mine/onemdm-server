@@ -15,7 +15,7 @@ class PkgUsagesController < ApplicationController
   private
 
   def pkg_usage_params
-    params.permit(app_usage: [:package_name,
+    params.permit(pkg_usage: [:finger_print,
                               :usage_duration_in_seconds,
                               :used_on]).require(:pkg_usage)
   end

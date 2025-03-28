@@ -7,7 +7,7 @@ ActiveAdmin.register_page "Pkg Usage" do
       pkg_usages = PkgUsage.pkg_usages_per_device_pkg_day
       pkg_usages.each do |key,value|
         pkg_usage_data << {device_id: key[0],
-                        package_name: key[1],
+                        finger_print: key[1],
                         used_on: key[2],
                         usage: value}
       end
@@ -25,7 +25,7 @@ ActiveAdmin.register_page "Pkg Usage" do
           link_to device_id, admin_device_path(device_id)
         end
         column "Package Name" do |pkg_usage|
-          pkg_usage[:package_name]
+          pkg_usage[:finger_print]
         end
         column "Total Usage" do |pkg_usage|
           distance_of_time_in_words (pkg_usage[:usage])

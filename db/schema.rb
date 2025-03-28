@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_03_11_083304) do
+ActiveRecord::Schema[7.0].define(version: 2025_03_28_035000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -102,7 +102,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_03_11_083304) do
   end
 
   create_table "pkg_usages", force: :cascade do |t|
-    t.string "package_name", null: false
+    t.string "finger_print", null: false
     t.integer "usage_duration_in_seconds", null: false
     t.date "used_on", null: false
     t.bigint "device_id"
@@ -113,7 +113,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_03_11_083304) do
 
   create_table "pkgs", force: :cascade do |t|
     t.string "name"
-    t.string "package_name"
+    t.string "finger_print"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

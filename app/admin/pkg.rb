@@ -2,7 +2,7 @@ ActiveAdmin.register Pkg do
 
   menu priority: 3, label: "OTA Packages"
 
-  permit_params :name, :package_name
+  permit_params :name, :finger_print
 
   index :title => "OTA Packages" do
   end
