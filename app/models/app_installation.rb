@@ -25,7 +25,8 @@ class AppInstallation < ActiveRecord::Base
       message = {
         'token': self.device.gcm_token,
         'data': {
-          message: self.to_json
+          message: self.to_json,
+          type: "app"
         },
       }
       logger.debug "message #{message}"

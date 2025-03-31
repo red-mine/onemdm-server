@@ -12,6 +12,8 @@ class Device < ActiveRecord::Base
   has_many :heartbeats, dependent: :destroy
   has_many :app_installations, dependent: :destroy
   has_many :app_usages, dependent: :nullify
+  has_many :pkg_installations, dependent: :destroy
+  has_many :pkg_usages, dependent: :nullify
 
   scope :active, -> {where("last_heartbeat_recd_time > '#{Time.now.utc - ACTIVE_TIMEFRAME}'")}
   scope :missing, -> {where("last_heartbeat_recd_time < '#{Time.now.utc - ACTIVE_TIMEFRAME}'AND last_heartbeat_recd_time > '#{Time.now.utc - MISSING_TIMEFRAME}'")}

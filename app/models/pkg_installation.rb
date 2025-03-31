@@ -25,7 +25,8 @@ class PkgInstallation < ActiveRecord::Base
       message = {
         'token': self.device.gcm_token,
         'data': {
-          message: self.to_json
+          message: self.to_json,
+          type: "pkg"
         },
       }
       logger.debug "message #{message}"
