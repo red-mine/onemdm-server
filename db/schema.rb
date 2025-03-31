@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_03_28_035000) do
+ActiveRecord::Schema[7.0].define(version: 2025_03_28_091501) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -46,6 +46,23 @@ ActiveRecord::Schema[7.0].define(version: 2025_03_28_035000) do
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
   end
 
+  create_table "app_batch_installations", force: :cascade do |t|
+    t.bigint "app_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["app_id"], name: "index_app_batch_installations_on_app_id"
+  end
+
+  create_table "app_installations", force: :cascade do |t|
+    t.bigint "device_id"
+    t.bigint "app_batch_installation_id"
+    t.integer "status", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["app_batch_installation_id"], name: "index_app_installations_on_app_batch_installation_id"
+    t.index ["device_id"], name: "index_app_installations_on_device_id"
+  end
+
   create_table "app_usages", force: :cascade do |t|
     t.string "package_name", null: false
     t.integer "usage_duration_in_seconds", null: false
@@ -61,13 +78,6 @@ ActiveRecord::Schema[7.0].define(version: 2025_03_28_035000) do
     t.string "package_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "batch_installations", force: :cascade do |t|
-    t.bigint "app_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["app_id"], name: "index_batch_installations_on_app_id"
   end
 
   create_table "devices", force: :cascade do |t|
@@ -91,14 +101,21 @@ ActiveRecord::Schema[7.0].define(version: 2025_03_28_035000) do
     t.index ["device_id"], name: "index_heartbeats_on_device_id"
   end
 
-  create_table "installations", force: :cascade do |t|
+  create_table "pkg_batch_installations", force: :cascade do |t|
+    t.bigint "pkg_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pkg_id"], name: "index_pkg_batch_installations_on_pkg_id"
+  end
+
+  create_table "pkg_installations", force: :cascade do |t|
     t.bigint "device_id"
-    t.bigint "batch_installation_id"
+    t.bigint "pkg_batch_installation_id"
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["batch_installation_id"], name: "index_installations_on_batch_installation_id"
-    t.index ["device_id"], name: "index_installations_on_device_id"
+    t.index ["device_id"], name: "index_pkg_installations_on_device_id"
+    t.index ["pkg_batch_installation_id"], name: "index_pkg_installations_on_pkg_batch_installation_id"
   end
 
   create_table "pkg_usages", force: :cascade do |t|
@@ -118,10 +135,13 @@ ActiveRecord::Schema[7.0].define(version: 2025_03_28_035000) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "app_batch_installations", "apps"
+  add_foreign_key "app_installations", "app_batch_installations"
+  add_foreign_key "app_installations", "devices"
   add_foreign_key "app_usages", "devices"
-  add_foreign_key "batch_installations", "apps"
   add_foreign_key "heartbeats", "devices"
-  add_foreign_key "installations", "batch_installations"
-  add_foreign_key "installations", "devices"
+  add_foreign_key "pkg_batch_installations", "pkgs"
+  add_foreign_key "pkg_installations", "devices"
+  add_foreign_key "pkg_installations", "pkg_batch_installations"
   add_foreign_key "pkg_usages", "devices"
 end

@@ -1,9 +1,9 @@
-class Installation < ActiveRecord::Base
+class AppInstallation < ActiveRecord::Base
   enum status: [:pushed, :downloaded, :cancelled, :installed]
-  delegate :app, to: :batch_installation
+  delegate :app, to: :app_batch_installation
 
   belongs_to :device
-  belongs_to :batch_installation
+  belongs_to :app_batch_installation
 
   after_create :push_apps
 

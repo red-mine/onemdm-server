@@ -10,7 +10,7 @@ class Device < ActiveRecord::Base
   after_create :update_last_heartbeats_time
 
   has_many :heartbeats, dependent: :destroy
-  has_many :installations, dependent: :destroy
+  has_many :app_installations, dependent: :destroy
   has_many :app_usages, dependent: :nullify
 
   scope :active, -> {where("last_heartbeat_recd_time > '#{Time.now.utc - ACTIVE_TIMEFRAME}'")}

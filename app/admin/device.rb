@@ -9,14 +9,29 @@ ActiveAdmin.register Device do
     {"App Name" => apps}
   end
 
-  batch_action :push, confirm: "Select apps to push",form: app_data do |ids,inputs|
+  pkg_data = lambda do
+    pkgs = Pkg.order('name').reload.pluck(:name,:id)
+    {"Pkg Name" => pkgs}
+  end
+
+  batch_action :push_apps, confirm: "Select apps to push", form: app_data do |ids, inputs|
     app = App.find(inputs["App Name"])
-    batch = BatchInstallation.create(:app => app)
+    batch = AppBatchInstallation.create(:app => app)
     ids.each do | id |
-      install = Installation.new(device: Device.find(id),batch_installation: batch)
+      install = AppInstallation.new(device: Device.find(id), app_batch_installation: batch)
       install.pushed!
     end
     redirect_to admin_dashboard_path, notice: "Successfully pushed app to device(s)"
+  end
+
+  batch_action :push_pkgs, confirm: "Select pkgs to push", form: pkg_data do |ids, inputs|
+    pkg = Pkg.find(inputs["Pkg Name"])
+    batch = PkgBatchInstallation.create(:pkg => pkg)
+    ids.each do | id |
+      install = PkgInstallation.new(device: Device.find(id), pkg_batch_installation: batch)
+      install.pushed!
+    end
+    redirect_to admin_dashboard_path, notice: "Successfully pushed pkg to device(s)"
   end
 
   index do
@@ -80,11 +95,11 @@ ActiveAdmin.register Device do
       end
 
       panel "APP INSTALL DETAILS" do
-        table_for device.installations.order('updated_at desc') do
-          column "App Name" do |installation|
-            link_to installation.app.name, admin_app_path(installation.app.id)
+        table_for device.app_installations.order('updated_at desc') do
+          column "App Name" do |app_installation|
+            link_to app_installation.app.name, admin_app_path(app_installation.app.id)
           end
-          column(:status){ |installation| installation.status.titleize }
+          column(:status){ |app_installation| app_installation.status.titleize }
           column "Date", :updated_at
         end
       end

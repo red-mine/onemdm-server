@@ -1,9 +1,9 @@
-class InstallationsController < ApplicationController
+class AppInstallationsController < ApplicationController
   before_action :authenticate_device
   respond_to :json
 
   def installed
-    Installation.find(params[:id]).installed!
+    AppInstallation.find(params[:id]).installed!
     render json:{}, status: :ok
   end
 end

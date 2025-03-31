@@ -14,9 +14,9 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
     end
-    
+
     panel "Recent Pushes" do
-      table_for BatchInstallation.order('id desc').limit(10) do
+      table_for AppBatchInstallation.order('id desc').limit(10) do
         column "Pushed on" do |batch|
           batch.created_at
         end
@@ -24,31 +24,31 @@ ActiveAdmin.register_page "Dashboard" do
           batch.app.name
         end
         column "# Devices" do |batch|
-          link_to batch.installations.count,
-            admin_devices_path(q: {installations_batch_installation_id_eq: batch.id})
+          link_to batch.app_installations.count,
+            admin_devices_path(q: {app_installations_app_batch_installation_id_eq: batch.id})
         end
         column "# Installed" do |batch|
-          link_to batch.installations.installed.count,
-            admin_devices_path(q: {installations_batch_installation_id_eq: batch.id,
-                                 installations_status_eq: Installation.statuses[:installed]})
+          link_to batch.app_installations.installed.count,
+            admin_devices_path(q: {app_installations_app_batch_installation_id_eq: batch.id,
+                                 installations_status_eq: AppInstallation.statuses[:installed]})
         end
         column "# Cancelled" do |batch|
-          link_to batch.installations.cancelled.count,
-            admin_devices_path(q: {installations_batch_installation_id_eq: batch.id,
-                                 installations_status_eq: Installation.statuses[:cancelled]})
+          link_to batch.app_installations.cancelled.count,
+            admin_devices_path(q: {app_installations_app_batch_installation_id_eq: batch.id,
+                                 installations_status_eq: AppInstallation.statuses[:cancelled]})
         end
         column "# Pending" do |batch|
-          link_to batch.installations.pushed.count + batch.installations.downloaded.count,
-             admin_devices_path(q: {installations_batch_installation_id_eq: batch.id,
-                                 installations_status_in: [Installation.statuses[:pushed],
-                                                           Installation.statuses[:downloaded]]})
+          link_to batch.app_installations.pushed.count + batch.app_installations.downloaded.count,
+             admin_devices_path(q: {app_installations_app_batch_installation_id_eq: batch.id,
+                                 installations_status_in: [AppInstallation.statuses[:pushed],
+                                                           AppInstallation.statuses[:downloaded]]})
         end
         column "% Success" do |batch|
-          total = batch.installations.count
-          installed = batch.installations.installed.count
+          total = batch.app_installations.count
+          installed = batch.app_installations.installed.count
           percentage_success = (installed/total) * 100 if total > 0
         end
       end
-    end    
+    end
   end # content
 end
