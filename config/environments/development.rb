@@ -44,5 +44,6 @@ Rails.application.configure do
 
   ACTIVE_TIMEFRAME = 1.hours
   MISSING_TIMEFRAME = 2.hours
-  DEFAULT_APP_URL = "http://192.168.2.92:3000/onemdm.apk"
+  DEFAULT_APP_URL = "http://10.11.108.35/tota/FactoryTestTool.apk"
+  DEFAULT_OTA_URL = "http://10.11.108.35/tota/update.zip"
 end

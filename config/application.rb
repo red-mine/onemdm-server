@@ -37,7 +37,7 @@ module OnemdmServer
 end
 STATUS_CLASSES = {active: { class: 'ok' }, missing: { class: 'warning' }, dead: { class: 'error' }}
 GCM_KEY = "AIzaSyCZ3lVhV2CbIcZ22f1YI_MvPx3C7sMm_2g"
-DEFAULT_APP_PACKAGE_NAME = "com.multunus.onemdm"
-DEFAULT_APP_URL = "http://dcl1sqgk9np4h.cloudfront.net/onemdm.apk"
-DEFAULT_OTA_PACKAGE_NAME = "com.multunus.onemdm"
-DEFAULT_OTA_URL = "http://dcl1sqgk9np4h.cloudfront.net/onemdm.apk"
+DEFAULT_APP_PACKAGE_NAME = "com.tes.testtools"
+DEFAULT_APP_URL = "http://10.11.108.35/tota/FactoryTestTool.apk"
+DEFAULT_OTA_FINGER_PRINT = "MicroTouch/IDC_Series/IDC_Series:13/TP1A.241116.014/V4.0:user/release-keys"
+DEFAULT_OTA_URL = "http://10.11.108.35/tota/update.zip"

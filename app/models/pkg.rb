@@ -7,7 +7,7 @@ class Pkg < ActiveRecord::Base
   validates :name, :finger_print, presence: true
 
   def ota_url
-    return DEFAULT_OTA_URL if self.finger_print.eql?(DEFAULT_OTA_PACKAGE_NAME)
+    return DEFAULT_OTA_URL if self.finger_print.eql?(DEFAULT_OTA_FINGER_PRINT)
     ""
   end
 end
