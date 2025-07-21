@@ -40,7 +40,7 @@ Eager to get started? This section gives a good introduction to set up OneMDM an
 OneMDM server uses PostgreSQL as database. Install PostgreSQL if it is not installed already:
 
 ``` bash
-sudo apt-get install postgresql postgresql-contrib postgresql-server-dev-9.3
+sudo apt-get install postgresql postgresql-contrib postgresql-server-dev-16
 ```
 
 Clone the repo and install the gems:
