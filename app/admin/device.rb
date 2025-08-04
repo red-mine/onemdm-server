@@ -103,6 +103,17 @@ ActiveAdmin.register Device do
           column "Date", :updated_at
         end
       end
+
+      panel "OTA INSTALL DETAILS" do
+        table_for device.pkg_installations.order('updated_at desc') do
+          column "OTA Name" do |pkg_installation|
+            link_to pkg_installation.pkg.name, admin_pkg_path(pkg_installation.pkg.id)
+          end
+          column(:status){ |pkg_installation| pkg_installation.status.titleize }
+          column "Date", :updated_at
+        end
+      end
+
     end
   end
 end
