@@ -1,6 +1,6 @@
 ActiveAdmin.register App do
 
-  menu priority: 6, label: "Apps"
+  menu priority: 7, label: "Apps"
 
   permit_params :name, :package_name
 

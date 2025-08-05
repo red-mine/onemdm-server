@@ -1,6 +1,6 @@
 ActiveAdmin.register Device do
 
-  menu priority: 4, label: "Devices"
+  menu priority: 5, label: "Devices"
 
   actions :all, except: [:edit,:new]
 
@@ -12,6 +12,11 @@ ActiveAdmin.register Device do
   pkg_data = lambda do
     pkgs = Pkg.order('name').reload.pluck(:name,:id)
     {"Pkg Name" => pkgs}
+  end
+
+  group_data = lambda do
+    groups = Group.order(:name).pluck(:name, :id)
+    { "Group Name" => groups }
   end
 
   batch_action :push_apps, confirm: "Select apps to push", form: app_data do |ids, inputs|
@@ -34,6 +39,12 @@ ActiveAdmin.register Device do
     redirect_to admin_dashboard_path, notice: "Successfully pushed pkg to device(s)"
   end
 
+  batch_action :assign_group, confirm: "Select Group to assign", form: group_data do |ids, inputs|
+    group = Group.find(inputs["Group Name"])
+    Device.where(id: ids).update_all(group_id: group.id)
+    redirect_to collection_path, notice: "Devices successfully assigned to group #{group.name}"
+  end
+
   index do
     selectable_column
     id_column
@@ -48,6 +59,9 @@ ActiveAdmin.register Device do
     column :heartbeats_count
     column :last_heartbeat_recd_time
     column :created_at
+    column "Group" do |device|
+      device.group&.name
+    end
     actions
   end
   filter :model
@@ -57,6 +71,7 @@ ActiveAdmin.register Device do
   filter :os_version
   filter :client_version
   filter :imei_number
+  filter :group
 
   scope :active
   scope :missing
