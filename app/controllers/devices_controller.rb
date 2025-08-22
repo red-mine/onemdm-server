@@ -21,6 +21,7 @@ class DevicesController < ApplicationController
   def device_params
     params.require(:device).permit(:model,
                                    :unique_id,
+                                   :serial_no,
                                    :imei_number,
                                    :gcm_token,
                                    :os_version,

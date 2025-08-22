@@ -2,7 +2,9 @@ ActiveAdmin.register Device do
 
   menu priority: 5, label: "Devices"
 
-  actions :all, except: [:edit,:new]
+  # actions :all, except: [:edit,:new]
+
+  permit_params :model, :unique_id, :serial_no, :imei_number, :os_version, :client_version, :gcm_token, :group_id
 
   app_data = lambda do
     apps = App.order('name').reload.pluck(:name,:id)
@@ -53,7 +55,9 @@ ActiveAdmin.register Device do
       status_tag status.titleize, STATUS_CLASSES[status.to_sym]
     end
     column "Model Name",:model
-    column "IMEI Number",:imei_number
+    # column "IMEI Number",:imei_number
+    column :unique_id
+    column :serial_no
     column :os_version
     column :client_version
     column :heartbeats_count
@@ -76,6 +80,20 @@ ActiveAdmin.register Device do
   scope :active
   scope :missing
   scope :dead
+
+  form do |f|
+    f.inputs "Device Details" do
+      f.input :model
+      f.input :unique_id
+      f.input :serial_no
+      f.input :imei_number
+      f.input :os_version
+      f.input :client_version
+      f.input :gcm_token
+      f.input :group, as: :select, collection: Group.all.collect { |g| [g.name, g.id] }
+    end
+    f.actions
+  end
 
   show do
     attributes_table do
