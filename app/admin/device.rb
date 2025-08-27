@@ -4,7 +4,7 @@ ActiveAdmin.register Device do
 
   # actions :all, except: [:edit,:new]
 
-  permit_params :model, :unique_id, :serial_no, :imei_number, :os_version, :client_version, :gcm_token, :group_id
+  permit_params :model, :unique_id, :serial_no, :finger_print, :imei_number, :os_version, :client_version, :gcm_token, :group_id
 
   app_data = lambda do
     apps = App.order('name').reload.pluck(:name,:id)
@@ -58,6 +58,7 @@ ActiveAdmin.register Device do
     # column "IMEI Number",:imei_number
     column :unique_id
     column :serial_no
+    column :finger_print
     column :os_version
     column :client_version
     column :heartbeats_count
@@ -86,6 +87,7 @@ ActiveAdmin.register Device do
       f.input :model
       f.input :unique_id
       f.input :serial_no
+      f.input :finger_print
       f.input :imei_number
       f.input :os_version
       f.input :client_version
