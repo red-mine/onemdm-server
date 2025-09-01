@@ -102,18 +102,18 @@ ActiveAdmin.register Device do
       content_tag(:span, fp.truncate(60), title: fp)
     end
 
-    # —— 指纹解析（一次取出，以下复用） ——
-    column("Brand")       { |d| (pf = FP_CACHE.call(d.finger_print))[:brand] }
-    column("Product")     { |d| (pf = FP_CACHE.call(d.finger_print))[:product] }
-    column("Device")      { |d| (pf = FP_CACHE.call(d.finger_print))[:device].presence || d.model }
-    column("OS Release")  { |d| (pf = FP_CACHE.call(d.finger_print))[:release].presence || d.os_version }
-    column("Build ID")    { |d| FP_CACHE.call(d.finger_print)[:build_id] }
-    column("Incremental") { |d| FP_CACHE.call(d.finger_print)[:incremental] }
-    column("Build Type")  { |d| FP_CACHE.call(d.finger_print)[:build_type] }
-    column("Tags") do |d|
-      t = FP_CACHE.call(d.finger_print)[:tags].to_s
-      content_tag(:span, t.truncate(32), title: t)
-    end
+    # # —— 指纹解析（一次取出，以下复用） ——
+    # column("Brand")       { |d| (pf = FP_CACHE.call(d.finger_print))[:brand] }
+    # column("Product")     { |d| (pf = FP_CACHE.call(d.finger_print))[:product] }
+    # column("Device")      { |d| (pf = FP_CACHE.call(d.finger_print))[:device].presence || d.model }
+    # column("OS Release")  { |d| (pf = FP_CACHE.call(d.finger_print))[:release].presence || d.os_version }
+    # column("Build ID")    { |d| FP_CACHE.call(d.finger_print)[:build_id] }
+    # column("Incremental") { |d| FP_CACHE.call(d.finger_print)[:incremental] }
+    # column("Build Type")  { |d| FP_CACHE.call(d.finger_print)[:build_type] }
+    # column("Tags") do |d|
+    #   t = FP_CACHE.call(d.finger_print)[:tags].to_s
+    #   content_tag(:span, t.truncate(32), title: t)
+    # end
 
     column :client_version
     column :heartbeats_count
