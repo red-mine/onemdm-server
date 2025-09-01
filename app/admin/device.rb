@@ -84,7 +84,7 @@ ActiveAdmin.register Device do
     redirect_to collection_path, notice: "Devices successfully assigned to group #{group.name} (#{ids.size} updated)"
   end
 
-  # ===== 列表页：优先显示从 FP 解析的值 =====
+  # ===== 列表页：展示 FP 解析项到主列表 =====
   index do
     selectable_column
     id_column
@@ -94,28 +94,31 @@ ActiveAdmin.register Device do
       status_tag status.to_s.titleize, STATUS_CLASSES[status.to_sym]
     end
 
-    column("Model Name") { |d| (pf = FP_CACHE.call(d.finger_print))[:device].presence || d.model }
+    # —— 指纹解析（一次取出，以下复用） ——
+    column("Brand")       { |d| (pf = FP_CACHE.call(d.finger_print))[:brand] }
+    column("Product")     { |d| (pf = FP_CACHE.call(d.finger_print))[:product] }
+    column("Device")      { |d| (pf = FP_CACHE.call(d.finger_print))[:device].presence || d.model }
+    column("OS Release")  { |d| (pf = FP_CACHE.call(d.finger_print))[:release].presence || d.os_version }
+    column("Build ID")    { |d| FP_CACHE.call(d.finger_print)[:build_id] }
+    column("Incremental") { |d| FP_CACHE.call(d.finger_print)[:incremental] }
+    column("Build Type")  { |d| FP_CACHE.call(d.finger_print)[:build_type] }
+    column("Tags") do |d|
+      t = FP_CACHE.call(d.finger_print)[:tags].to_s
+      content_tag(:span, t.truncate(32), title: t)
+    end
+
+    # —— 原有字段（保留） ——
     column :unique_id
     column :serial_no
     column :finger_print do |d|
       fp = d.finger_print.to_s
-      short = fp.truncate(60)
-      content_tag(:span, short, title: fp)
+      content_tag(:span, fp.truncate(60), title: fp)
     end
-    column("OS Version") { |d| (pf = FP_CACHE.call(d.finger_print))[:release].presence || d.os_version }
     column :client_version
-
-    # 追加可视化构建信息（来自 FP，非必填）
-    column("Build ID")    { |d| FP_CACHE.call(d.finger_print)[:build_id] }
-    column("Incremental") { |d| FP_CACHE.call(d.finger_print)[:incremental] }
-    column("Type/Tags")   { |d| pf = FP_CACHE.call(d.finger_print); [pf[:build_type], pf[:tags]].compact.join(" / ") }
-
     column :heartbeats_count
     column :last_heartbeat_recd_time
     column :created_at
-    column "Group" do |device|
-      device.group&.name
-    end
+    column("Group") { |d| d.group&.name }
 
     actions
   end
