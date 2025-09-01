@@ -1,33 +1,76 @@
+# app/admin/dashboard.rb
 ActiveAdmin.register_page "Dashboard" do
   menu priority: 1, label: proc { I18n.t("active_admin.dashboard") }
 
   content title: proc { I18n.t("active_admin.dashboard") } do
-    # === New: Developments panel (像 GOTA 的列表) ===
+    # === Developments (brand_product_device from fingerprint) ===
     panel "Developments" do
-      # 以 Device.model 作为 Deployment Name
-      models = Device.distinct.order(:model).pluck(:model)
+      # 用局部变量避免常量重复定义警告
+      fp_regex = /\A
+        (?<brand>[^\/]+)\/
+        (?<product>[^\/]+)\/
+        (?<device>[^:]+):
+        (?<release>[^\/]+)\/
+        (?<build_id>[^\/]+)\/
+        (?<incremental>[^:]+):
+        (?<build_type>[^\/]+)\/
+        (?<tags>.+)
+      \z/x
 
-      table_for models do
-        # Deployment 名称 -> 点进去筛选该型号设备
-        column("Deployment Name") { |m| link_to(m.presence || "(unknown)", admin_devices_path(q: { model_eq: m })) }
+      # 解析器用 lambda，避免在类级别定义方法
+      parse_deployment = lambda do |fp, fallback_model = nil|
+        m = fp_regex.match(fp.to_s)
+        unless m
+          name = fallback_model.presence || "(unknown)"
+          return [name, nil]
+        end
+        name   = "#{m[:brand]}_#{m[:product]}_#{m[:device]}".downcase
+        prefix = "#{m[:brand]}/#{m[:product]}/#{m[:device]}:"
+        [name, prefix]
+      end
 
-        # 活跃设备数量（若你有 scope :active，可替换为 Device.active）
-        column("Active Devices")  { |m| Device.where(model: m).count }
+      # 取必要字段避免 N+1
+      devs = Device.select(:id, :finger_print, :model, :updated_at)
 
-        # 安装百分比（Installed / Offered）基于该型号最近一次 OTA 批次
-        column("Install Percentages (Installed / Offered)") do |m|
+      # 分组：deployment_name => { :prefix, :devices => [Device,...] }
+      groups = Hash.new { |h, k| h[k] = { prefix: nil, devices: [] } }
+      devs.each do |d|
+        name, prefix = parse_deployment.call(d.finger_print, d.model)
+        groups[name][:prefix] ||= prefix
+        groups[name][:devices] << d
+      end
+
+      names = groups.keys.sort
+
+      table_for names do
+        # Deployment 名称（点击按 fingerprint 前缀筛选）
+        column("Deployment Name") do |name|
+          prefix = groups[name][:prefix]
+          if prefix.present?
+            link_to name, admin_devices_path(q: { finger_print_cont: prefix })
+          else
+            name
+          end
+        end
+
+        # Active Devices（如有 scope :active，可替换为 Device.where(id: ids).active.count）
+        column("Active Devices") do |name|
+          groups[name][:devices].size
+        end
+
+        # 安装率（Installed / Offered）：以该部署设备参与的最近一次 OTA 批次计算
+        column("Install Percentages (Installed / Offered)") do |name|
+          ids = groups[name][:devices].map(&:id)   # ← 不要用 map!，避免把设备数组改成整数
           latest = PkgBatchInstallation
-                     .joins(pkg_installations: :device)
-                     .where(devices: { model: m })
+                     .joins(:pkg_installations)
+                     .where(pkg_installations: { device_id: ids })
                      .order(id: :desc)
                      .first
 
           if latest
-            offered   = latest.pkg_installations.joins(:device).where(devices: { model: m }).count
-            installed = latest.pkg_installations
-                               .joins(:device)
-                               .where(devices: { model: m }, status: PkgInstallation.statuses[:installed])
-                               .count
+            scope = latest.pkg_installations.where(device_id: ids)
+            offered   = scope.count
+            installed = scope.where(status: PkgInstallation.statuses[:installed]).count
             pct = offered.zero? ? 0.0 : (installed.to_f / offered * 100.0)
             "#{number_to_percentage(pct, precision: 1)} (#{installed} / #{offered})"
           else
@@ -35,12 +78,9 @@ ActiveAdmin.register_page "Dashboard" do
           end
         end
 
-        # 最近一次相关 OTA 批次的时间
-        column("Last update") do |m|
-          ts = PkgBatchInstallation
-                 .joins(pkg_installations: :device)
-                 .where(devices: { model: m })
-                 .maximum(:created_at)
+        # 最近更新时间：该部署下设备的最大 updated_at
+        column("Last update") do |name|
+          ts = groups[name][:devices].map(&:updated_at).compact.max
           ts ? l(ts, format: :long) : "—"
         end
       end
