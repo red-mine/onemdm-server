@@ -1,5 +1,5 @@
+# app/admin/devices.rb
 ActiveAdmin.register Device do
-
   menu priority: 5, label: "Devices"
 
   # 允许的参数（保留原样）
@@ -33,15 +33,21 @@ ActiveAdmin.register Device do
     }
   end
 
-  # ===== 批量动作：保留你的原逻辑 =====
+  # 每次请求级别的简易缓存，避免重复解析指纹
+  FP_CACHE = ->(fp) do
+    @__fp_cache ||= {}
+    @__fp_cache[fp] ||= PARSE_FP.call(fp)
+  end
+
+  # ===== 批量动作：保留你的原逻辑（加事务 + 预取） =====
   app_data = lambda do
-    apps = App.order('name').reload.pluck(:name,:id)
-    {"App Name" => apps}
+    apps = App.order('name').reload.pluck(:name, :id)
+    { "App Name" => apps }
   end
 
   pkg_data = lambda do
-    pkgs = Pkg.order('name').reload.pluck(:name,:id)
-    {"Pkg Name" => pkgs}
+    pkgs = Pkg.order('name').reload.pluck(:name, :id)
+    { "Pkg Name" => pkgs }
   end
 
   group_data = lambda do
@@ -51,50 +57,58 @@ ActiveAdmin.register Device do
 
   batch_action :push_apps, confirm: "Select apps to push", form: app_data do |ids, inputs|
     app = App.find(inputs["App Name"])
-    batch = AppBatchInstallation.create(app: app)
-    ids.each do | id |
-      install = AppInstallation.new(device: Device.find(id), app_batch_installation: batch)
-      install.pushed!
+    ActiveRecord::Base.transaction do
+      batch = AppBatchInstallation.create!(app: app)
+      Device.where(id: ids).find_each do |device|
+        AppInstallation.create!(device: device, app_batch_installation: batch, status: :pushed)
+      end
     end
-    redirect_to admin_dashboard_path, notice: "Successfully pushed app to device(s)"
+    redirect_to admin_dashboard_path, notice: "Successfully pushed app to #{ids.size} device(s)"
   end
 
   batch_action :push_pkgs, confirm: "Select pkgs to push", form: pkg_data do |ids, inputs|
     pkg = Pkg.find(inputs["Pkg Name"])
-    batch = PkgBatchInstallation.create(pkg: pkg)
-    ids.each do | id |
-      install = PkgInstallation.new(device: Device.find(id), pkg_batch_installation: batch)
-      install.pushed!
+    ActiveRecord::Base.transaction do
+      batch = PkgBatchInstallation.create!(pkg: pkg)
+      Device.where(id: ids).find_each do |device|
+        PkgInstallation.create!(device: device, pkg_batch_installation: batch, status: :pushed)
+      end
     end
-    redirect_to admin_dashboard_path, notice: "Successfully pushed pkg to device(s)"
+    redirect_to admin_dashboard_path, notice: "Successfully pushed pkg to #{ids.size} device(s)"
   end
 
   batch_action :assign_group, confirm: "Select Group to assign", form: group_data do |ids, inputs|
     group = Group.find(inputs["Group Name"])
-    Device.where(id: ids).update_all(group_id: group.id)
-    redirect_to collection_path, notice: "Devices successfully assigned to group #{group.name}"
+    # update_all 不触发回调；如果你需要回调/审计，可改为 find_each + update!
+    Device.where(id: ids).update_all(group_id: group.id, updated_at: Time.current)
+    redirect_to collection_path, notice: "Devices successfully assigned to group #{group.name} (#{ids.size} updated)"
   end
 
   # ===== 列表页：优先显示从 FP 解析的值 =====
   index do
     selectable_column
     id_column
-    column "Status" do | device |
+
+    column "Status" do |device|
       status = device.status
-      status_tag status.titleize, STATUS_CLASSES[status.to_sym]
+      status_tag status.to_s.titleize, STATUS_CLASSES[status.to_sym]
     end
-    column("Model Name") { |d| (pf = PARSE_FP.call(d.finger_print))[:device].presence  || d.model }
-    # column "IMEI Number",:imei_number
+
+    column("Model Name") { |d| (pf = FP_CACHE.call(d.finger_print))[:device].presence || d.model }
     column :unique_id
     column :serial_no
-    column :finger_print
-    column("OS Version") { |d| (pf = PARSE_FP.call(d.finger_print))[:release].presence || d.os_version }
+    column :finger_print do |d|
+      fp = d.finger_print.to_s
+      short = fp.truncate(60)
+      content_tag(:span, short, title: fp)
+    end
+    column("OS Version") { |d| (pf = FP_CACHE.call(d.finger_print))[:release].presence || d.os_version }
     column :client_version
 
     # 追加可视化构建信息（来自 FP，非必填）
-    column("Build ID")    { |d| PARSE_FP.call(d.finger_print)[:build_id] }
-    column("Incremental") { |d| PARSE_FP.call(d.finger_print)[:incremental] }
-    column("Type/Tags")   { |d| pf = PARSE_FP.call(d.finger_print); [pf[:build_type], pf[:tags]].compact.join(" / ") }
+    column("Build ID")    { |d| FP_CACHE.call(d.finger_print)[:build_id] }
+    column("Incremental") { |d| FP_CACHE.call(d.finger_print)[:incremental] }
+    column("Type/Tags")   { |d| pf = FP_CACHE.call(d.finger_print); [pf[:build_type], pf[:tags]].compact.join(" / ") }
 
     column :heartbeats_count
     column :last_heartbeat_recd_time
@@ -102,10 +116,11 @@ ActiveAdmin.register Device do
     column "Group" do |device|
       device.group&.name
     end
+
     actions
   end
 
-  # ===== 筛选器（保留原有 + 增加一个模糊搜索 FP 的输入框） =====
+  # ===== 筛选器（保留原有 + 模糊搜索 FP） =====
   filter :model
   filter :created_at
   filter :updated_at
@@ -114,7 +129,8 @@ ActiveAdmin.register Device do
   filter :client_version
   filter :imei_number
   filter :group
-  filter :finger_print_contains, as: :string, label: "FP contains"
+  # Ransack 的 contains 谓词是 _cont
+  filter :finger_print_cont, as: :string, label: "FP contains"
 
   # ===== 状态 scope（保留原样） =====
   scope :active
@@ -132,7 +148,7 @@ ActiveAdmin.register Device do
       f.input :os_version,   hint: "展示时优先读取指纹中的 release（此字段可作为兜底）"
       f.input :client_version
       f.input :gcm_token
-      f.input :group, as: :select, collection: Group.all.collect { |g| [g.name, g.id] }
+      f.input :group, as: :select, collection: Group.order(:name).pluck(:name, :id)
     end
     f.actions
   end
@@ -141,12 +157,12 @@ ActiveAdmin.register Device do
   show do
     attributes_table do
       row :model do |d|
-        (pf = PARSE_FP.call(d.finger_print))[:device].presence || d.model
+        (pf = FP_CACHE.call(d.finger_print))[:device].presence || d.model
       end
       row :imei_number
       row :unique_id
       row :os_version do |d|
-        (pf = PARSE_FP.call(d.finger_print))[:release].presence || d.os_version
+        (pf = FP_CACHE.call(d.finger_print))[:release].presence || d.os_version
       end
       row :client_version
       row :last_heartbeat_recd_time
@@ -155,7 +171,7 @@ ActiveAdmin.register Device do
       row :updated_at
 
       row "FingerPrint Parsed" do |d|
-        pf = PARSE_FP.call(d.finger_print)
+        pf = FP_CACHE.call(d.finger_print)
         if pf.blank?
           status_tag "Invalid FP", :warning
         else
@@ -181,59 +197,49 @@ ActiveAdmin.register Device do
 
       panel "App Usage Details" do
         table_for device.app_usage_summary do
-          column "Used On" do |app_usage|
-            app_usage[:used_on]
-          end
-          column "App Name" do |app_usage|
-            app_usage[:package_name]
-          end
-          column "Total Usage" do |app_usage|
-            total_usage += app_usage[:usage]
-            distance_of_time_in_words app_usage[:usage]
+          column("Used On")      { |u| u[:used_on] }
+          column("App Name")     { |u| u[:package_name] }
+          column("Total Usage")  do |u|
+            total_usage += u[:usage]
+            distance_of_time_in_words u[:usage]
           end
         end
       end
 
-      row "Total Usage" do
-        distance_of_time_in_words total_usage
-      end
+      row("Total Usage") { distance_of_time_in_words total_usage }
 
       panel "APP INSTALL DETAILS" do
-        table_for device.app_installations.order('updated_at desc') do
-          column "App Name" do |app_installation|
-            link_to app_installation.app.name, admin_app_path(app_installation.app.id)
-          end
-          column(:status){ |app_installation| app_installation.status.titleize }
+        table_for device.app_installations.order(updated_at: :desc) do
+          column("App Name") { |ai| link_to ai.app.name, admin_app_path(ai.app.id) }
+          column(:status)    { |ai| ai.status.titleize }
           column "Date", :updated_at
         end
       end
 
       panel "OTA INSTALL DETAILS" do
-        table_for device.pkg_installations.order('updated_at desc') do
-          column "OTA Name" do |pkg_installation|
-            link_to pkg_installation.pkg.name, admin_pkg_path(pkg_installation.pkg.id)
-          end
-          column(:status){ |pkg_installation| pkg_installation.status.titleize }
+        table_for device.pkg_installations.order(updated_at: :desc) do
+          column("OTA Name") { |pi| link_to pi.pkg.name, admin_pkg_path(pi.pkg.id) }
+          column(:status)    { |pi| pi.status.titleize }
           column "Date", :updated_at
         end
       end
     end
   end
 
-  # ===== CSV 导出：包含 FP 拆解字段 =====
+  # ===== CSV 导出：包含 FP 拆解字段（使用缓存） =====
   csv do
     column(:id)
     column(:unique_id)
     column(:serial_no)
     column(:finger_print)
-    column("brand")       { |d| PARSE_FP.call(d.finger_print)[:brand] }
-    column("product")     { |d| PARSE_FP.call(d.finger_print)[:product] }
-    column("device")      { |d| PARSE_FP.call(d.finger_print)[:device] }
-    column("os_release")  { |d| PARSE_FP.call(d.finger_print)[:release] }
-    column("build_id")    { |d| PARSE_FP.call(d.finger_print)[:build_id] }
-    column("incremental") { |d| PARSE_FP.call(d.finger_print)[:incremental] }
-    column("build_type")  { |d| PARSE_FP.call(d.finger_print)[:build_type] }
-    column("tags")        { |d| PARSE_FP.call(d.finger_print)[:tags] }
+    column("brand")       { |d| FP_CACHE.call(d.finger_print)[:brand] }
+    column("product")     { |d| FP_CACHE.call(d.finger_print)[:product] }
+    column("device")      { |d| FP_CACHE.call(d.finger_print)[:device] }
+    column("os_release")  { |d| FP_CACHE.call(d.finger_print)[:release] }
+    column("build_id")    { |d| FP_CACHE.call(d.finger_print)[:build_id] }
+    column("incremental") { |d| FP_CACHE.call(d.finger_print)[:incremental] }
+    column("build_type")  { |d| FP_CACHE.call(d.finger_print)[:build_type] }
+    column("tags")        { |d| FP_CACHE.call(d.finger_print)[:tags] }
     column(:client_version)
     column(:heartbeats_count)
     column(:last_heartbeat_recd_time)
