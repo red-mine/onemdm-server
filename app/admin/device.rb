@@ -94,6 +94,14 @@ ActiveAdmin.register Device do
       status_tag status.to_s.titleize, STATUS_CLASSES[status.to_sym]
     end
 
+    # —— 原有字段（保留） ——
+    column :unique_id
+    column :serial_no
+    column :finger_print do |d|
+      fp = d.finger_print.to_s
+      content_tag(:span, fp.truncate(60), title: fp)
+    end
+
     # —— 指纹解析（一次取出，以下复用） ——
     column("Brand")       { |d| (pf = FP_CACHE.call(d.finger_print))[:brand] }
     column("Product")     { |d| (pf = FP_CACHE.call(d.finger_print))[:product] }
@@ -107,13 +115,6 @@ ActiveAdmin.register Device do
       content_tag(:span, t.truncate(32), title: t)
     end
 
-    # —— 原有字段（保留） ——
-    column :unique_id
-    column :serial_no
-    column :finger_print do |d|
-      fp = d.finger_print.to_s
-      content_tag(:span, fp.truncate(60), title: fp)
-    end
     column :client_version
     column :heartbeats_count
     column :last_heartbeat_recd_time
