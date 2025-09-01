@@ -7,7 +7,7 @@ ActiveAdmin.register Pkg do
     before_action { @page_title = "OTA Packages" }
   end
 
-  # 列表页：Name -> 下载链接 （优先 ota_url，其次内部 download 动作）
+  # 列表页：Name -> 下载链接（优先 ota_url，其次内部 download 动作）
   index do
     selectable_column
     id_column
@@ -18,11 +18,22 @@ ActiveAdmin.register Pkg do
       elsif File.exist?(Rails.root.join("public", "ota", File.basename(pkg.name.to_s)))
         link_to pkg.name, download_admin_pkg_path(pkg)
       else
-        pkg.name # 找不到可下载资源就显示纯文本
+        pkg.name # 找不到资源显示纯文本
       end
     end
 
     column :finger_print
+
+    # 解析字段（只读展示）
+    column("Brand")       { |pkg| pkg.fp_brand }
+    column("Product")     { |pkg| pkg.fp_product }
+    column("Device")      { |pkg| pkg.fp_device }
+    column("OS Release")  { |pkg| pkg.fp_os_release }
+    column("Build ID")    { |pkg| pkg.fp_build_id }
+    column("Incremental") { |pkg| pkg.fp_incremental }
+    column("Type")        { |pkg| pkg.fp_build_type }
+    column("Tags")        { |pkg| pkg.fp_tags }
+
     column :created_at
     column :updated_at
 
@@ -35,18 +46,20 @@ ActiveAdmin.register Pkg do
     end
   end
 
-  # 过滤器
+  # 过滤器（指纹可用包含搜索）
   filter :name
-  filter :finger_print
+  filter :finger_print_cont, label: "finger_print contains"
   filter :created_at
   filter :updated_at
 
-  # 详情页也放一个下载入口
+  # 详情页：基本信息 + Fingerprint 解析 + 下载入口
   show do
     attributes_table do
       row :id
       row :name
       row :finger_print
+      row :created_at
+      row :updated_at
       row :download do |pkg|
         if pkg.ota_url.present?
           link_to "Download", pkg.ota_url, target: "_blank", rel: "noopener"
@@ -54,9 +67,28 @@ ActiveAdmin.register Pkg do
           link_to "Download", download_admin_pkg_path(pkg)
         end
       end
-      row :created_at
-      row :updated_at
     end
+
+    panel "Fingerprint Parsed" do
+      pf = resource.parsed_fingerprint
+      if pf.blank?
+        div class: "blank_slate_container" do
+          span "Cannot parse finger_print with the standard Android format."
+        end
+      else
+        attributes_table_for resource do
+          row("Brand")       { pf[:brand] }
+          row("Product")     { pf[:product] }
+          row("Device")      { pf[:device] }
+          row("OS Release")  { pf[:os_release] }
+          row("Build ID")    { pf[:build_id] }
+          row("Incremental") { pf[:incremental] }
+          row("Build Type")  { pf[:build_type] }
+          row("Tags")        { pf[:tags] }
+        end
+      end
+    end
+
     active_admin_comments
   end
 
@@ -64,12 +96,21 @@ ActiveAdmin.register Pkg do
   member_action :download, method: :get do
     pkg = resource
     file_name = File.basename(pkg.name.to_s) # 防目录穿越
-    path = Rails.root.join("public", "ota", file_name)
+    base_dir  = Rails.root.join("public", "ota")
+    path      = base_dir.join(file_name)
+
+    # 额外白名单检查
+    unless path.to_s.start_with?(base_dir.to_s)
+      redirect_to resource_path, alert: "Invalid file path"
+      return
+    end
 
     if File.exist?(path)
+      # 使用 marcel 自动识别 MIME（Rails 默认依赖）
+      mime = Marcel::MimeType.for(path)
       send_file path,
                 filename: file_name,
-                type: "application/zip",
+                type: mime,
                 disposition: "attachment"
     else
       redirect_to resource_path, alert: "File not found: #{file_name}"
