@@ -1,30 +1,24 @@
 # app/admin/pkgs.rb
 ActiveAdmin.register Pkg do
   menu priority: 3, label: "OTA Packages"
-
-  # 二选一：
-  # - 用 ActiveStorage: 允许 :file
-  # - 用外链字段     : 允许 :file_url
-  permit_params :name, :finger_print, :file, :file_url
+  permit_params :name, :finger_print
 
   controller do
     before_action { @page_title = "OTA Packages" }
   end
 
-  # 列表页：Name 变成可下载链接
+  # 列表页：Name -> 下载链接 （优先 ota_url，其次内部 download 动作）
   index do
     selectable_column
     id_column
 
     column :name do |pkg|
-      if pkg.respond_to?(:file) && pkg.file.respond_to?(:attached?) && pkg.file.attached?
-        # ActiveStorage 附件下载链接
-        link_to pkg.name, rails_blob_path(pkg.file, disposition: "attachment"), target: "_blank"
-      elsif pkg.respond_to?(:file_url) && pkg.file_url.present?
-        # 直接外链
-        link_to pkg.name, pkg.file_url, target: "_blank"
+      if pkg.ota_url.present?
+        link_to pkg.name, pkg.ota_url, target: "_blank", rel: "noopener"
+      elsif File.exist?(Rails.root.join("public", "ota", File.basename(pkg.name.to_s)))
+        link_to pkg.name, download_admin_pkg_path(pkg)
       else
-        pkg.name
+        pkg.name # 找不到可下载资源就显示纯文本
       end
     end
 
@@ -33,10 +27,10 @@ ActiveAdmin.register Pkg do
     column :updated_at
 
     actions defaults: true do |pkg|
-      if pkg.respond_to?(:file) && pkg.file.respond_to?(:attached?) && pkg.file.attached?
-        item "Download", rails_blob_path(pkg.file, disposition: "attachment"), class: "member_link", target: "_blank"
-      elsif pkg.respond_to?(:file_url) && pkg.file_url.present?
-        item "Download", pkg.file_url, class: "member_link", target: "_blank"
+      if pkg.ota_url.present?
+        item "Download", pkg.ota_url, class: "member_link", target: "_blank", rel: "noopener"
+      elsif File.exist?(Rails.root.join("public", "ota", File.basename(pkg.name.to_s)))
+        item "Download", download_admin_pkg_path(pkg), class: "member_link"
       end
     end
   end
@@ -47,17 +41,17 @@ ActiveAdmin.register Pkg do
   filter :created_at
   filter :updated_at
 
-  # 详情页：展示下载链接
+  # 详情页也放一个下载入口
   show do
     attributes_table do
       row :id
       row :name
       row :finger_print
-      row :file do |pkg|
-        if pkg.respond_to?(:file) && pkg.file.respond_to?(:attached?) && pkg.file.attached?
-          link_to pkg.file.filename.to_s, rails_blob_path(pkg.file, disposition: "attachment"), target: "_blank"
-        elsif pkg.respond_to?(:file_url) && pkg.file_url.present?
-          link_to File.basename(pkg.file_url), pkg.file_url, target: "_blank"
+      row :download do |pkg|
+        if pkg.ota_url.present?
+          link_to "Download", pkg.ota_url, target: "_blank", rel: "noopener"
+        elsif File.exist?(Rails.root.join("public", "ota", File.basename(pkg.name.to_s)))
+          link_to "Download", download_admin_pkg_path(pkg)
         end
       end
       row :created_at
@@ -66,21 +60,19 @@ ActiveAdmin.register Pkg do
     active_admin_comments
   end
 
-  # 表单：支持上传附件或填写外链
-  form do |f|
-    f.inputs "OTA Package Details" do
-      f.input :name, label: "Package Name"
-      f.input :finger_print, label: "Finger Print"
+  # 受控下载：从 public/ota/<name> 发送文件
+  member_action :download, method: :get do
+    pkg = resource
+    file_name = File.basename(pkg.name.to_s) # 防目录穿越
+    path = Rails.root.join("public", "ota", file_name)
 
-      if resource.respond_to?(:file) # ActiveStorage
-        f.input :file, as: :file,
-                hint: (resource.file.attached? ? link_to(resource.file.filename.to_s, rails_blob_path(resource.file, disposition: "attachment")) : nil)
-      end
-
-      if resource.respond_to?(:file_url)
-        f.input :file_url, label: "File URL（可选：直接外链）"
-      end
+    if File.exist?(path)
+      send_file path,
+                filename: file_name,
+                type: "application/zip",
+                disposition: "attachment"
+    else
+      redirect_to resource_path, alert: "File not found: #{file_name}"
     end
-    f.actions
   end
 end
