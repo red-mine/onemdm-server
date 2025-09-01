@@ -84,7 +84,6 @@ ActiveAdmin.register Device do
     redirect_to collection_path, notice: "Devices successfully assigned to group #{group.name} (#{ids.size} updated)"
   end
 
-  # ===== 列表页：展示 FP 解析项到主列表 =====
   index do
     selectable_column
     id_column
@@ -94,28 +93,23 @@ ActiveAdmin.register Device do
       status_tag status.to_s.titleize, STATUS_CLASSES[status.to_sym]
     end
 
-    # —— 原有字段（保留） ——
     column :unique_id
     column :serial_no
-    column :finger_print do |d|
-      fp = d.finger_print.to_s
-      content_tag(:span, fp.truncate(60), title: fp)
+
+    # —— 自定义开发代号 —— 
+    column "Development" do |d|
+      pf = FP_CACHE.call(d.finger_print)
+      parts = []
+      parts << pf[:brand].to_s.downcase if pf[:brand].present?
+      parts << pf[:device].to_s.downcase if pf[:device].present?
+      parts << pf[:product].to_s.downcase if pf[:product].present?
+      parts.reject!(&:blank?)
+      parts.join("_").presence || "n/a"
     end
 
-    # # —— 指纹解析（一次取出，以下复用） ——
-    # column("Brand")       { |d| (pf = FP_CACHE.call(d.finger_print))[:brand] }
-    # column("Product")     { |d| (pf = FP_CACHE.call(d.finger_print))[:product] }
-    # column("Device")      { |d| (pf = FP_CACHE.call(d.finger_print))[:device].presence || d.model }
-    # column("OS Release")  { |d| (pf = FP_CACHE.call(d.finger_print))[:release].presence || d.os_version }
-    # column("Build ID")    { |d| FP_CACHE.call(d.finger_print)[:build_id] }
-    # column("Incremental") { |d| FP_CACHE.call(d.finger_print)[:incremental] }
-    # column("Build Type")  { |d| FP_CACHE.call(d.finger_print)[:build_type] }
-    # column("Tags") do |d|
-    #   t = FP_CACHE.call(d.finger_print)[:tags].to_s
-    #   content_tag(:span, t.truncate(32), title: t)
-    # end
-
-    column :client_version
+    # 保留其他字段
+    column("OS Release")  { |d| FP_CACHE.call(d.finger_print)[:release].presence || d.os_version }
+    column(:client_version)
     column :heartbeats_count
     column :last_heartbeat_recd_time
     column :created_at
