@@ -22,17 +22,17 @@ ActiveAdmin.register Pkg do
       end
     end
 
-    column :finger_print
+    # ✅ 只显示 Development 名称，不显示完整指纹
+    column "Development" do |pkg|
+      parts = [pkg.fp_brand, pkg.fp_device, pkg.fp_product].compact
+      parts.any? ? parts.join("_").downcase : "-"
+    end
 
-    # 解析字段（只读展示）
-    column("Brand")       { |pkg| pkg.fp_brand }
-    column("Product")     { |pkg| pkg.fp_product }
-    column("Device")      { |pkg| pkg.fp_device }
+    # 保留一些关键的解析字段（可按需精简/调整顺序）
     column("OS Release")  { |pkg| pkg.fp_os_release }
     column("Build ID")    { |pkg| pkg.fp_build_id }
     column("Incremental") { |pkg| pkg.fp_incremental }
     column("Type")        { |pkg| pkg.fp_build_type }
-    column("Tags")        { |pkg| pkg.fp_tags }
 
     column :created_at
     column :updated_at
