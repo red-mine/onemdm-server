@@ -23,6 +23,7 @@ ActiveAdmin.register Group do
     f.inputs "Group Details" do
       f.input :name
       f.input :description
+      f.input :development
     end
     f.actions
   end
@@ -31,6 +32,7 @@ ActiveAdmin.register Group do
     attributes_table do
       row :name
       row :description
+      row :development
       row :created_at
       row :updated_at
     end

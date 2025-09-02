@@ -168,6 +168,7 @@ ActiveAdmin.register Device do
       row :heartbeats_count
       row :created_at
       row :updated_at
+      row :group
 
       row "FingerPrint Parsed" do |d|
         pf = FP_CACHE.call(d.finger_print)
