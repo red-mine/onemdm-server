@@ -2,6 +2,10 @@
 ActiveAdmin.register Pkg do
   menu priority: 3, label: "OTA Packages"
   permit_params :name, :finger_print
+  
+  # 允许从 Deployment/Dashboard 带参跳转做模糊过滤
+  filter :finger_print_cont, label: 'Fingerprint contains'
+  filter :name_cont
 
   controller do
     before_action { @page_title = "OTA Packages" }

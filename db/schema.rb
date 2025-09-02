@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_08_26_053757) do
+ActiveRecord::Schema[7.0].define(version: 2025_09_02_122949) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -80,6 +80,17 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_26_053757) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "deployments", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "description"
+    t.string "build_prefix"
+    t.string "build_suffix"
+    t.string "partner_product_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_deployments_on_name", unique: true
+  end
+
   create_table "devices", force: :cascade do |t|
     t.string "model"
     t.string "unique_id"
@@ -95,6 +106,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_26_053757) do
     t.integer "group_id"
     t.string "serial_no"
     t.string "finger_print"
+    t.bigint "deployment_id"
+    t.index ["deployment_id"], name: "index_devices_on_deployment_id"
     t.index ["group_id"], name: "index_devices_on_group_id"
   end
 
