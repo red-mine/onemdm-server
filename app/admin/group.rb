@@ -1,21 +1,21 @@
 ActiveAdmin.register Group do
   menu priority: 4, label: "Groups"
 
-  permit_params :name, :development, :description
+  permit_params :name, :deployment_id, :description
 
   index do
     selectable_column
     id_column
     column :name
     column :description
-    column :development
+    column :deployment
     column :created_at
     column :updated_at
     actions
   end
 
   filter :name
-  filter :development
+  filter :deployment
   filter :created_at
   filter :updated_at
 
@@ -23,7 +23,7 @@ ActiveAdmin.register Group do
     f.inputs "Group Details" do
       f.input :name
       f.input :description
-      f.input :development
+      f.input :deployment
     end
     f.actions
   end
@@ -32,7 +32,7 @@ ActiveAdmin.register Group do
     attributes_table do
       row :name
       row :description
-      row :development
+      row :deployment
       row :created_at
       row :updated_at
     end
