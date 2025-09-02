@@ -1,6 +1,7 @@
 class Device < ActiveRecord::Base
   enum status: [:active,:missing,:dead]
   belongs_to :group, optional: true
+  belongs_to :deployment, optional: true
 
   attr_accessor :status
 

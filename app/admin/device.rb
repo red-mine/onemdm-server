@@ -3,7 +3,7 @@ ActiveAdmin.register Device do
   menu priority: 5, label: "Devices"
 
   # 允许的参数（保留原样）
-  permit_params :model, :unique_id, :serial_no, :finger_print, :imei_number, :os_version, :client_version, :gcm_token, :group_id
+  permit_params :model, :unique_id, :deployment_id, :serial_no, :finger_print, :imei_number, :os_version, :client_version, :gcm_token, :group_id
 
   # ===== FingerPrint 解析（常量 + lambda，避免 helper_method） =====
   FP_REGEX = /\A
@@ -127,6 +127,7 @@ ActiveAdmin.register Device do
   filter :client_version
   filter :imei_number
   filter :group
+  filter :deployment
   # Ransack 的 contains 谓词是 _cont
   filter :finger_print_cont, as: :string, label: "FP contains"
 
