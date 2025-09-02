@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 class Deployment < ApplicationRecord
   has_many :devices, dependent: :nullify
+  has_many :groups, dependent: :nullify
+
   validates :name, presence: true, uniqueness: true
 
   def title_with_prefix

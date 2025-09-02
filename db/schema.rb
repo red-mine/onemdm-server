@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_09_02_152017) do
+ActiveRecord::Schema[7.0].define(version: 2025_09_03_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -116,8 +116,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_09_02_152017) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "development"
-    t.index ["development"], name: "index_groups_on_development"
+    t.bigint "deployment_id"
+    t.index ["deployment_id"], name: "index_groups_on_deployment_id"
   end
 
   create_table "heartbeats", force: :cascade do |t|
@@ -165,6 +165,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_09_02_152017) do
   add_foreign_key "app_installations", "app_batch_installations"
   add_foreign_key "app_installations", "devices"
   add_foreign_key "app_usages", "devices"
+  add_foreign_key "groups", "deployments"
   add_foreign_key "devices", "groups"
   add_foreign_key "heartbeats", "devices"
   add_foreign_key "pkg_batch_installations", "pkgs"
