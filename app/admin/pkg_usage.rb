@@ -1,6 +1,7 @@
 ActiveAdmin.register_page "Pkg Usage" do
 
-  menu priority: 2, label: "OTA Usage"
+  menu parent: :ota_packages_menu, priority: 2, label: "OTA Usage"
+
   content title: "OTA Usage" do
     pkg_usage_data = []
     begin

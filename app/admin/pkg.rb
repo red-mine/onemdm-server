@@ -1,6 +1,6 @@
 # app/admin/pkgs.rb
 ActiveAdmin.register Pkg do
-  menu priority: 3, label: "OTA Packages"
+  menu priority: 3, label: "OTA Packages", id: :ota_packages_menu
   permit_params :name, :finger_print
   
   # 允许从 Deployment/Dashboard 带参跳转做模糊过滤
