@@ -16,15 +16,19 @@ ActiveAdmin.register_page "Dashboard" do
                             .limit(1).pluck(:finger_print).first
           short = sample_fp.to_s.split(":", 2).first.presence
 
-          if short
-            ota_link = link_to "📦 OTA",
-                              admin_pkgs_path(q: { finger_print_cont: short }),
-                              class: "btn btn-small",
-                              title: "View OTA Packages for #{dep.name}"
-            safe_join([show_link, " ", ota_link])
-          else
-            show_link
-          end
+          Rails.logger.info "Dashboard: Deployment #{dep.name} sample_fp=#{sample_fp.inspect} short=#{short.inspect}"
+
+          # if short
+          #   ota_link = link_to "📦 OTA",
+          #                     admin_pkgs_path(q: { finger_print_cont: short }),
+          #                     class: "btn btn-small",
+          #                     title: "View OTA Packages for #{dep.name}"
+          #   safe_join([show_link, " ", ota_link])
+          # else
+          #   show_link
+          # end
+
+          show_link
         end
 
         column "ACTIVE DEVICES" do |dep|
