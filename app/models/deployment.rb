@@ -12,4 +12,14 @@ class Deployment < ApplicationRecord
       name
     end
   end
+
+  def ota_packages
+    sample_fp = devices.where.not(finger_print: [nil, ""]).limit(1).pluck(:finger_print).first
+    return Pkg.none if sample_fp.blank?
+
+    prefix = sample_fp.split(":").first
+    return Pkg.none if prefix.blank?
+
+    Pkg.where("finger_print LIKE ?", "#{prefix}%")
+  end
 end
