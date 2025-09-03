@@ -34,17 +34,16 @@ ActiveAdmin.register Deployment do
 
     tabs do
       tab "OTA Packages" do
-        dep = resource
-        sample_fp = dep.devices.where.not(finger_print: [nil, ""]).limit(1).pluck(:finger_print).first
-        short = sample_fp.to_s.split(":", 2).first.presence
-        if short
-          div do
-            text_node link_to "Open filtered OTA Packages (#{short})",
-                               admin_pkgs_path(q: { finger_print_cont: short }),
-                               class: "button"
-          end
-        else
-          status_tag "No sample fingerprint", :warning
+        table_for resource.pkgs do
+          column(:name) { |pkg| link_to pkg.name, admin_pkg_path(pkg) }
+          column :finger_print
+          column :created_at
+        end
+
+        div do
+          link_to "Create OTA Package for this Deployment",
+                  new_admin_pkg_path(deployment_id: resource.id),
+                  class: "button"
         end
       end
 
