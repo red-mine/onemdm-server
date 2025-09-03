@@ -1,6 +1,6 @@
 ActiveAdmin.register App do
 
-  menu parent: "Deployments", priority: 7, label: "Apps"
+  menu false # parent: "Deployments", priority: 7, label: "Apps"
 
   permit_params :name, :package_name
 
