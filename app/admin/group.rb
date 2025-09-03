@@ -1,5 +1,5 @@
 ActiveAdmin.register Group do
-  menu priority: 4, label: "Groups"
+  menu parent: "Devices", priority: 4, label: "Groups"
 
   permit_params :name, :deployment_id, :description
 
