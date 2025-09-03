@@ -34,10 +34,15 @@ ActiveAdmin.register Deployment do
 
     tabs do
       tab "OTA Packages" do
-        table_for resource.pkgs do
-          column(:name) { |pkg| link_to pkg.name, admin_pkg_path(pkg) }
-          column :finger_print
-          column :created_at
+        pkgs = resource.ota_packages
+        if pkgs.exists?
+          table_for pkgs do
+            column(:name) { |pkg| link_to pkg.name, admin_pkg_path(pkg) }
+            column :finger_print
+            column :created_at
+          end
+        else
+          status_tag "No OTA packages found", :warning
         end
 
         div do
