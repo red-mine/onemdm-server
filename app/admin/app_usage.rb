@@ -1,6 +1,6 @@
 ActiveAdmin.register_page "App Usage" do
 
-  menu priority: 6, label: "App Usage"
+  menu parent: "Deployments", priority: 6, label: "App Usage"
   content title: "App Usage" do
     app_usage_data = []
     begin
