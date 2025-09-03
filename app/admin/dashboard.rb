@@ -44,7 +44,7 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
     end
-    # === /Developments ===
+    # === /Deployments ===
 
     panel "Device Status" do
       columns do

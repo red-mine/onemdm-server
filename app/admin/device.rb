@@ -97,7 +97,7 @@ ActiveAdmin.register Device do
     column :serial_no
 
     # —— 自定义开发代号 —— 
-    column "Development" do |d|
+    column "Deployment" do |d|
       pf = FP_CACHE.call(d.finger_print)
       parts = []
       parts << pf[:brand].to_s.downcase if pf[:brand].present?

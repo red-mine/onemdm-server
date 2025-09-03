@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 ActiveAdmin.register Deployment do
-  menu priority: 2, label: "Developments"
+  menu priority: 2, label: "Deployments"
 
   permit_params :name, :description, :build_prefix, :build_suffix, :partner_product_id
 

@@ -26,8 +26,8 @@ ActiveAdmin.register Pkg do
       end
     end
 
-    # ✅ 只显示 Development 名称，不显示完整指纹
-    column "Development" do |pkg|
+    # ✅ 只显示 Deployment 名称，不显示完整指纹
+    column "Deployment" do |pkg|
       parts = [pkg.fp_brand, pkg.fp_device, pkg.fp_product].compact
       parts.any? ? parts.join("_").downcase : "-"
     end
