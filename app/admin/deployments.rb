@@ -60,6 +60,18 @@ ActiveAdmin.register Deployment do
           column(:show) { |d| link_to "View", admin_device_path(d) }
         end
       end
+
+      tab "Device Groups" do
+        table_for resource.groups do
+          column(:name) { |g| link_to g.name, admin_group_path(g) }
+          column :description
+          column("Devices") { |g| g.devices.count }
+        end
+
+        div do
+          link_to "Create Group for this Deployment", new_admin_group_path(deployment_id: resource.id), class: "button"
+        end
+      end
     end
   end
 end

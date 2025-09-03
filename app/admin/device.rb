@@ -51,7 +51,12 @@ ActiveAdmin.register Device do
   end
 
   group_data = lambda do
-    groups = Group.order(:name).pluck(:name, :id)
+    dep_id = params.dig(:q, :deployment_id_eq)
+    groups = if dep_id.present?
+               Group.where(deployment_id: dep_id).order(:name).pluck(:name, :id)
+             else
+               []
+             end
     { "Group Name" => groups }
   end
 

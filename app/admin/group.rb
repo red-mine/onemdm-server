@@ -28,6 +28,11 @@ ActiveAdmin.register Group do
     f.actions
   end
 
+  action_item :back_to_deployment, only: [:show, :edit, :new] do
+    dep = resource.deployment || Deployment.find_by(id: params[:deployment_id])
+    link_to "Back to Deployment", admin_deployment_path(dep) if dep
+  end
+
   show do
     attributes_table do
       row :name
@@ -45,6 +50,14 @@ ActiveAdmin.register Group do
         column :os_version
         column :client_version
         column :created_at
+      end
+    end
+  end
+
+  controller do
+    def build_resource(*args)
+      super.tap do |group|
+        group.deployment_id ||= params[:deployment_id]
       end
     end
   end
