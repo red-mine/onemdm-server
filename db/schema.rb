@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_09_03_120000) do
+ActiveRecord::Schema[7.0].define(version: 2025_09_04_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -127,6 +127,19 @@ ActiveRecord::Schema[7.0].define(version: 2025_09_03_120000) do
     t.index ["device_id"], name: "index_heartbeats_on_device_id"
   end
 
+  create_table "ota_configurations", force: :cascade do |t|
+    t.bigint "deployment_id", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.boolean "automatic_update", default: false, null: false
+    t.boolean "in_production", default: false, null: false
+    t.datetime "rollout_start_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["deployment_id", "name"], name: "index_ota_configurations_on_deployment_id_and_name", unique: true
+    t.index ["deployment_id"], name: "index_ota_configurations_on_deployment_id"
+  end
+
   create_table "pkg_batch_installations", force: :cascade do |t|
     t.bigint "pkg_id"
     t.datetime "created_at", null: false
@@ -168,6 +181,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_09_03_120000) do
   add_foreign_key "devices", "groups"
   add_foreign_key "groups", "deployments"
   add_foreign_key "heartbeats", "devices"
+  add_foreign_key "ota_configurations", "deployments"
   add_foreign_key "pkg_batch_installations", "pkgs"
   add_foreign_key "pkg_installations", "devices"
   add_foreign_key "pkg_installations", "pkg_batch_installations"

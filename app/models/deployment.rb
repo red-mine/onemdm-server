@@ -2,6 +2,7 @@
 class Deployment < ApplicationRecord
   has_many :devices, dependent: :nullify
   has_many :groups, dependent: :nullify
+  has_many :ota_configurations, dependent: :destroy
 
   validates :name, presence: true, uniqueness: true
 

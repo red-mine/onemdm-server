@@ -33,6 +33,26 @@ ActiveAdmin.register Deployment do
     end
 
     tabs do
+      tab "OTA Configurations" do
+        table_for resource.ota_configurations.order(:name) do
+          column(:name) { |cfg| link_to cfg.name, admin_ota_configuration_path(cfg) }
+          column :automatic_update
+          column :in_production
+          column :rollout_start_at
+          column(:actions) do |cfg|
+            span link_to("View", admin_ota_configuration_path(cfg))
+            span " | "
+            span link_to("Edit", edit_admin_ota_configuration_path(cfg))
+            span " | "
+            span link_to("Duplicate", duplicate_admin_ota_configuration_path(cfg), method: :post)
+          end
+        end
+
+        div do
+          link_to "Add Configuration", new_admin_ota_configuration_path(deployment_id: resource.id), class: "button"
+        end
+      end
+
       tab "OTA Packages" do
         pkgs = resource.ota_packages
         if pkgs.exists?
