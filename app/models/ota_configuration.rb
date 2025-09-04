@@ -1,10 +1,6 @@
 class OtaConfiguration < ApplicationRecord
   belongs_to :deployment
   belongs_to :pkg, optional: true
-  has_many :assignments, class_name: 'OtaConfigurationAssignment', dependent: :destroy
-  has_many :groups, through: :assignments
-
-  accepts_nested_attributes_for :assignments, allow_destroy: true
 
   validates :name, presence: true
   validates :deployment_id, presence: true
@@ -15,7 +11,7 @@ class OtaConfiguration < ApplicationRecord
   validates :rollout_strategy, inclusion: { in: %w[immediate staged] }
   validates :pkg_id, presence: true, if: -> { rollout_strategy.present? }
 
-  validate :groups_belong_to_same_deployment
+  # groups removed from OTA Configurations; no cross-deployment validation needed
 
   scope :in_production, -> { where(in_production: true) }
   scope :automatic, -> { where(automatic_update: true) }
@@ -29,20 +25,12 @@ class OtaConfiguration < ApplicationRecord
     copy.name = new_name.presence || "#{name} copy"
     copy.in_production = false
     copy.save!
-    # Duplicate assignments too
-    assignments.find_each do |a|
-      copy.assignments.create!(group_id: a.group_id)
-    end
     copy
   end
 
   # Devices targeted by this configuration
   def target_devices
-    base = deployment.devices
-    if groups.exists?
-      base = base.where(group_id: groups.select(:id))
-    end
-    base
+    deployment.devices
   end
 
   def target_devices_count
@@ -76,9 +64,4 @@ class OtaConfiguration < ApplicationRecord
   end
 
   private
-
-  def groups_belong_to_same_deployment
-    bad = groups.detect { |g| g.deployment_id != deployment_id }
-    errors.add(:groups, "must belong to the same deployment") if bad
-  end
 end

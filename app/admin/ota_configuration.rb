@@ -4,8 +4,7 @@ ActiveAdmin.register OtaConfiguration do
 
   permit_params :deployment_id, :name, :description, :automatic_update, :in_production, :rollout_start_at,
                 :rollout_strategy, :rollout_total_percent, :rollout_step_percent, :rollout_step_interval_hours,
-                :rollout_current_percent, :paused, :pkg_id,
-                assignments_attributes: [:id, :group_id, :_destroy]
+                :rollout_current_percent, :paused, :pkg_id
 
   filter :deployment
   filter :name_cont, label: "Name contains"
@@ -72,17 +71,7 @@ ActiveAdmin.register OtaConfiguration do
       f.input :rollout_start_at, as: :datetime_select
     end
 
-    f.inputs "Assignments" do
-      f.has_many :assignments, allow_destroy: true, new_record: 'Add Group' do |af|
-        groups = if f.object.deployment_id.present?
-                   Group.where(deployment_id: f.object.deployment_id)
-                 else
-                   Group.all
-                 end
-        af.input :group, collection: groups
-      end
-      para "If no groups are assigned, all devices in the deployment are targeted."
-    end
+    # Groups removed: OTA Config targets all devices in the Deployment
 
     f.inputs "Staged Rollout" do
       f.input :rollout_strategy, as: :select, collection: [['Immediate', 'immediate'], ['Staged', 'staged']], include_blank: false
