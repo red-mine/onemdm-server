@@ -39,6 +39,7 @@ ActiveAdmin.register Deployment do
           column :automatic_update
           column :in_production
           column :rollout_start_at
+          column(:pkg) { |cfg| cfg.pkg ? link_to(cfg.pkg.name, admin_pkg_path(cfg.pkg)) : '-' }
           column("Strategy") { |cfg| cfg.rollout_strategy }
           column("Targets") { |cfg| cfg.target_devices_count }
           column("Rollout") { |cfg| "#{cfg.rollout_progress}%" }

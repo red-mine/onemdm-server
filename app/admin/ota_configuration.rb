@@ -4,7 +4,7 @@ ActiveAdmin.register OtaConfiguration do
 
   permit_params :deployment_id, :name, :description, :automatic_update, :in_production, :rollout_start_at,
                 :rollout_strategy, :rollout_total_percent, :rollout_step_percent, :rollout_step_interval_hours,
-                :rollout_current_percent, :paused,
+                :rollout_current_percent, :paused, :pkg_id,
                 assignments_attributes: [:id, :group_id, :_destroy]
 
   filter :deployment
@@ -19,6 +19,7 @@ ActiveAdmin.register OtaConfiguration do
     column(:name) { |c| link_to c.name, admin_ota_configuration_path(c) }
     column(:deployment) { |c| link_to c.deployment.name, admin_deployment_path(c.deployment) }
     column :automatic_update
+    column(:pkg) { |c| c.pkg ? link_to(c.pkg.name, admin_pkg_path(c.pkg)) : status_tag('None', class: 'warning') }
     column :in_production
     column :rollout_start_at
     column("Targets") { |c| c.target_devices_count }
@@ -44,6 +45,7 @@ ActiveAdmin.register OtaConfiguration do
       row :name
       row :description
       row :automatic_update
+      row(:pkg) { |c| c.pkg ? link_to(c.pkg.name, admin_pkg_path(c.pkg)) : '-' }
       row :in_production
       row :rollout_start_at
       row :rollout_strategy
@@ -89,6 +91,17 @@ ActiveAdmin.register OtaConfiguration do
       f.input :rollout_step_interval_hours, label: 'Step interval (hours)'
       f.input :rollout_current_percent, hint: 'Current rollout progress (0-100)'
       f.input :paused
+    end
+
+    f.inputs "OTA Package" do
+      pkgs = if f.object&.deployment_id
+               f.object.deployment.ota_packages
+             elsif params[:deployment_id]
+               Deployment.find_by(id: params[:deployment_id])&.ota_packages || Pkg.all
+             else
+               Pkg.all
+             end
+      f.input :pkg, collection: pkgs, hint: 'Select the OTA package to roll out'
     end
     f.actions
   end
