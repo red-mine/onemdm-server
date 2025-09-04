@@ -39,6 +39,9 @@ ActiveAdmin.register Deployment do
           column :automatic_update
           column :in_production
           column :rollout_start_at
+          column("Strategy") { |cfg| cfg.rollout_strategy }
+          column("Targets") { |cfg| cfg.target_devices_count }
+          column("Rollout") { |cfg| "#{cfg.rollout_progress}%" }
           column(:actions) do |cfg|
             span link_to("View", admin_ota_configuration_path(cfg))
             span " | "

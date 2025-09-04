@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_09_04_130000) do
+ActiveRecord::Schema[7.0].define(version: 2025_09_04_130500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -127,6 +127,16 @@ ActiveRecord::Schema[7.0].define(version: 2025_09_04_130000) do
     t.index ["device_id"], name: "index_heartbeats_on_device_id"
   end
 
+  create_table "ota_configuration_assignments", force: :cascade do |t|
+    t.bigint "ota_configuration_id", null: false
+    t.bigint "group_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["group_id"], name: "index_ota_configuration_assignments_on_group_id"
+    t.index ["ota_configuration_id", "group_id"], name: "index_ota_cfg_assignments_uniqueness", unique: true
+    t.index ["ota_configuration_id"], name: "index_ota_cfg_assignments_on_cfg"
+  end
+
   create_table "ota_configurations", force: :cascade do |t|
     t.bigint "deployment_id", null: false
     t.string "name", null: false
@@ -136,6 +146,12 @@ ActiveRecord::Schema[7.0].define(version: 2025_09_04_130000) do
     t.datetime "rollout_start_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "rollout_strategy", default: "immediate", null: false
+    t.integer "rollout_total_percent", default: 100, null: false
+    t.integer "rollout_step_percent", default: 10, null: false
+    t.integer "rollout_step_interval_hours", default: 24, null: false
+    t.integer "rollout_current_percent", default: 0, null: false
+    t.boolean "paused", default: false, null: false
     t.index ["deployment_id", "name"], name: "index_ota_configurations_on_deployment_id_and_name", unique: true
     t.index ["deployment_id"], name: "index_ota_configurations_on_deployment_id"
   end
@@ -181,6 +197,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_09_04_130000) do
   add_foreign_key "devices", "groups"
   add_foreign_key "groups", "deployments"
   add_foreign_key "heartbeats", "devices"
+  add_foreign_key "ota_configuration_assignments", "groups"
+  add_foreign_key "ota_configuration_assignments", "ota_configurations"
   add_foreign_key "ota_configurations", "deployments"
   add_foreign_key "pkg_batch_installations", "pkgs"
   add_foreign_key "pkg_installations", "devices"
