@@ -178,7 +178,16 @@ ActiveAdmin.register Device do
       f.input :os_version,   hint: "展示时优先读取指纹中的 release（此字段可作为兜底）"
       f.input :client_version
       f.input :gcm_token
-      f.input :group, as: :select, collection: Group.order(:name).pluck(:name, :id)
+
+      # Only show groups belonging to the device's deployment
+      groups_for_dep = []
+      dep_id_for_form = f.object&.deployment_id
+      if dep_id_for_form.present?
+        groups_for_dep = Group.where(deployment_id: dep_id_for_form).order(:name).pluck(:name, :id)
+      else
+        groups_for_dep = []
+      end
+      f.input :group, as: :select, collection: groups_for_dep, include_blank: "None (same deployment only)"
     end
     f.actions
   end
