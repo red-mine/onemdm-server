@@ -3,6 +3,9 @@ Rails.application.routes.draw do
 
   devise_for :admin_users, ActiveAdmin::Devise.config
 
+  # Ensure /admin always shows the dashboard (even if ActiveAdmin config changes)
+  get '/admin', to: redirect('/admin/dashboard')
+
   post 'heartbeats', to: 'heartbeats#create', :defaults => { :format => :json }
   post '/app_installations/installed', :defaults => { :format => :json }
   get '/apps',to: 'apps#index', :defaults => { :format => :json }
