@@ -1,6 +1,7 @@
 # app/admin/dashboard.rb
 ActiveAdmin.register_page "Dashboard" do
-  menu priority: 1, label: proc { I18n.t("active_admin.dashboard") }
+  # Hide from the top navigation; keep the page available at /admin/dashboard
+  menu false
 
   content title: proc { I18n.t("active_admin.dashboard") } do
     # === Deployments（基于新表）的快速入口 ===
