@@ -7,6 +7,9 @@
 // For example, to change the sidebar width:
 // $sidebar-width: 242px;
 
+// Adjust sidebar width before importing base styles
+$sidebar-width: 240px;
+
 // Active Admin's got SASS!
 @import "active_admin/mixins";
 @import "active_admin/base";
@@ -15,3 +18,18 @@
 // For example, to change the default status-tag color:
 //
 //   .status_tag { background: #6090DB; }
+
+// Make index tables more compact and avoid horizontal scrolling
+table.index_table {
+  table-layout: fixed;   // distribute columns evenly within container
+  width: 100%;
+}
+
+table.index_table th,
+table.index_table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;   // prevent wrapping; keep row height tight
+}
+
+// Non-variable overrides continue below

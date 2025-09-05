@@ -112,12 +112,12 @@ ActiveAdmin.register Device do
       parts.join("_").presence || "n/a"
     end
 
-    # 保留其他字段
-    column("OS Release")  { |d| FP_CACHE.call(d.finger_print)[:release].presence || d.os_version }
-    column(:client_version)
-    column :heartbeats_count
-    column :last_heartbeat_recd_time
-    column :created_at
+    # 保留其他字段（缩短列标题）
+    column("OS")      { |d| FP_CACHE.call(d.finger_print)[:release].presence || d.os_version }
+    column("Client")  { |d| d.client_version }
+    column("HBs")     { |d| d.heartbeats_count }
+    column("Last Heartbeat") { |d| d.last_heartbeat_recd_time }
+    column("Created") { |d| d.created_at }
     column("Group") { |d| d.group&.name }
 
     actions
