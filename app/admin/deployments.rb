@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 ActiveAdmin.register Deployment do
-  menu priority: 2, label: "Deployments"
+  # Hide global Deployments list; navigate from Dashboard instead
+  menu false
 
   permit_params :name, :description, :build_prefix, :build_suffix, :partner_product_id
 
