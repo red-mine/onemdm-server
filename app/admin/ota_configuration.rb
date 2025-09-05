@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 ActiveAdmin.register OtaConfiguration do
-  menu parent: "Deployments", priority: 5, label: "OTA Configurations"
+  # Hide global menu; access OTA Configurations from a Deployment's tabs
+  menu false
 
   permit_params :deployment_id, :name, :description, :automatic_update, :in_production, :rollout_start_at,
                 :rollout_strategy, :rollout_total_percent, :rollout_step_percent, :rollout_step_interval_hours,
