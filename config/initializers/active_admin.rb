@@ -115,8 +115,8 @@ ActiveAdmin.setup do |config|
   # Set the action to call for the root path. You can set different
   # roots for each namespace.
   #
-  # Default root: go to Deployments like GOTA.
-  config.root_to = 'deployments#index'
+  # Default root: land on Dashboard so /admin matches / and /admin/dashboard
+  config.root_to = 'dashboard#index'
 
   # == Admin Comments
   #
