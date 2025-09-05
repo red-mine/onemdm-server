@@ -9,52 +9,7 @@ ActiveAdmin.register_page "Dashboard" do
   end
 
   content title: "Deployments" do
-    # === Deployments（基于新表）的快速入口 ===
-    panel "Deployments Overview" do
-      deployments = Deployment.order(:name).select(:id, :name)
-
-      table_for deployments do
-        column "DEPLOYMENT NAME" do |dep|
-          show_link = link_to dep.name, admin_deployment_path(dep)
-
-          sample_fp = Device.where(deployment_id: dep.id)
-                            .where.not(finger_print: [nil, ""])
-                            .limit(1).pluck(:finger_print).first
-          short = sample_fp.to_s.split(":", 2).first.presence
-
-          Rails.logger.info "Dashboard: Deployment #{dep.name} sample_fp=#{sample_fp.inspect} short=#{short.inspect}"
-
-          # if short
-          #   ota_link = link_to "📦 OTA",
-          #                     admin_pkgs_path(q: { finger_print_cont: short }),
-          #                     class: "btn btn-small",
-          #                     title: "View OTA Packages for #{dep.name}"
-          #   safe_join([show_link, " ", ota_link])
-          # else
-          #   show_link
-          # end
-
-          show_link
-        end
-
-        column "ACTIVE DEVICES" do |dep|
-          Device.where(deployment_id: dep.id)
-                .where.not(last_heartbeat_recd_time: nil).count
-        end
-
-        column "OTA PACKAGES" do |dep|
-          short = Device.where(deployment_id: dep.id)
-                        .where.not(finger_print: [nil, ""]) 
-                        .limit(1).pluck(:finger_print).first.to_s.split(":", 2).first.presence
-          short ? link_to("View", admin_pkgs_path(q: { finger_print_cont: short })) : status_tag("N/A")
-        end
-
-        column "LAST UPDATE" do |dep|
-          Device.where(deployment_id: dep.id).maximum(:updated_at)
-        end
-      end
-    end
-    # === /Deployments ===
+    # === /Deployments Overview removed ===
 
     panel "All Deployments" do
       table_for Deployment.order(:name) do
