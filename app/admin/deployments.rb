@@ -142,18 +142,7 @@ ActiveAdmin.register Deployment do
         end
       end
 
-      tab "Devices" do
-        table_for resource.devices.order(id: :desc).limit(50) do
-          column :id
-          column :model
-          column :unique_id
-          column :serial_no
-          column :os_version
-          column :client_version
-          column :last_heartbeat_recd_time
-          column(:show) { |d| link_to "View", admin_device_path(d) }
-        end
-      end
+      # Devices tab removed as requested; device details are accessible via other flows
     end
   end
 end
