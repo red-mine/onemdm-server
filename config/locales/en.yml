@@ -21,3 +21,14 @@
 
 en:
   hello: "Hello world"
+  activerecord:
+    models:
+      ota_configuration:
+        one: "OTA Configuration"
+        other: "OTA Configurations"
+      ota_configuration_assignment:
+        one: "OTA Configuration Assignment"
+        other: "OTA Configuration Assignments"
+      pkg:
+        one: "OTA Package"
+        other: "OTA Packages"
