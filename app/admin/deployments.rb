@@ -3,6 +3,11 @@ ActiveAdmin.register Deployment do
   # Hide global Deployments list; navigate from Dashboard instead
   menu false
 
+  # Quick navigation back to the dashboard from a deployment page
+  action_item :back_to_dashboard, only: :show do
+    link_to 'Back to Dashboard', admin_dashboard_path
+  end
+
   permit_params :name, :description, :build_prefix, :build_suffix, :partner_product_id
 
   filter :name_cont, label: "Name contains"
