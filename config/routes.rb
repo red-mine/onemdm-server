@@ -6,7 +6,8 @@ Rails.application.routes.draw do
   # Ensure /admin always shows the dashboard (even if ActiveAdmin config changes)
   get '/admin', to: redirect('/admin/deployments')
 
-  # Use ActiveAdmin's native /admin/deployments for the Deployments index
+  # Alias the dashboard to /admin/deployments so we can mix dashboard + deployments
+  get '/admin/deployments', to: 'admin/dashboard#index'
 
   post 'heartbeats', to: 'heartbeats#create', :defaults => { :format => :json }
   post '/app_installations/installed', :defaults => { :format => :json }

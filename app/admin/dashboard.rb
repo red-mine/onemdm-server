@@ -10,7 +10,7 @@ ActiveAdmin.register_page "Dashboard" do
 
   content title: "Deployments" do
     # === Deployments（基于新表）的快速入口 ===
-    panel "Deployments (new)" do
+    panel "Deployments Overview" do
       deployments = Deployment.order(:name).select(:id, :name)
 
       table_for deployments do
@@ -44,7 +44,7 @@ ActiveAdmin.register_page "Dashboard" do
 
         column "OTA PACKAGES" do |dep|
           short = Device.where(deployment_id: dep.id)
-                        .where.not(finger_print: [nil, ""])
+                        .where.not(finger_print: [nil, ""]) 
                         .limit(1).pluck(:finger_print).first.to_s.split(":", 2).first.presence
           short ? link_to("View", admin_pkgs_path(q: { finger_print_cont: short })) : status_tag("N/A")
         end
@@ -55,6 +55,30 @@ ActiveAdmin.register_page "Dashboard" do
       end
     end
     # === /Deployments ===
+
+    panel "All Deployments" do
+      table_for Deployment.order(:name) do
+        column(:id)
+        column("Deployment Name", :name) { |dep| link_to dep.name, admin_deployment_path(dep) }
+        column("Active Devices") { |dep| dep.active_devices_count }
+        column("Install Percentages") do |dep|
+          installed = dep.ota_installed_count
+          offered   = dep.ota_offered_count
+          pct       = dep.ota_install_percentage
+          if offered.zero?
+            span "–%"; br; small "(0 / 0)"
+          else
+            span "#{pct}%"; br; small "(#{installed} / #{offered})"
+          end
+        end
+        column("Last update") { |dep| dep.ota_last_update_at || '-' }
+        column(:actions) { |dep| link_to('View', admin_deployment_path(dep)) }
+      end
+
+      div do
+        link_to "New Deployment", new_admin_deployment_path, class: "button"
+      end
+    end
 
     panel "Device Status" do
       columns do
