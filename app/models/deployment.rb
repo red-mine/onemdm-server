@@ -23,4 +23,27 @@ class Deployment < ApplicationRecord
 
     Pkg.where("finger_print LIKE ?", "#{prefix}%")
   end
+
+  # === Dashboard-style rollout metrics ===
+  def active_devices_count
+    devices.active.count
+  end
+
+  def ota_offered_count
+    PkgInstallation.joins(:device).where(devices: { deployment_id: id }).count
+  end
+
+  def ota_installed_count
+    PkgInstallation.joins(:device).where(devices: { deployment_id: id }).installed.count
+  end
+
+  def ota_install_percentage
+    offered = ota_offered_count
+    return 0 if offered.zero?
+    ((ota_installed_count.to_f / offered) * 100).round(1)
+  end
+
+  def ota_last_update_at
+    PkgInstallation.joins(:device).where(devices: { deployment_id: id }).maximum(:updated_at)
+  end
 end

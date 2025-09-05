@@ -9,14 +9,28 @@ ActiveAdmin.register Deployment do
   filter :build_prefix_cont
   filter :build_suffix_cont
 
-  index do
+  index title: "Your Deployments" do
     selectable_column
     id_column
-    column(:name) { |dep| link_to dep.name, admin_deployment_path(dep) }
-    column :partner_product_id
-    column :build_prefix
-    column :build_suffix
-    column("Devices") { |dep| dep.devices.count }
+    column("Deployment Name", :name) { |dep| link_to dep.name, admin_deployment_path(dep) }
+    column("Active Devices") { |dep| dep.active_devices_count }
+    column("Install Percentages") do |dep|
+      installed = dep.ota_installed_count
+      offered = dep.ota_offered_count
+      pct = dep.ota_install_percentage
+      if offered.zero?
+        span "–%"
+        br
+        small "(0 / 0)"
+      else
+        span "#{pct}%"
+        br
+        small "(#{installed} / #{offered})"
+      end
+    end
+    column("Last update") do |dep|
+      dep.ota_last_update_at || '-'
+    end
     actions
   end
 
