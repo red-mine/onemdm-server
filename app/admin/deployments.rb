@@ -47,15 +47,19 @@ ActiveAdmin.register Deployment do
   end
 
   show title: :name do
-    attributes_table do
-      row :name
-      row :description
-      row :partner_product_id
-      row :build_prefix
-      row :build_suffix
-      row("Active devices") { |dep| dep.devices.where.not(last_heartbeat_recd_time: nil).count }
-      row :created_at
-      row :updated_at
+    # Render details more compactly: two columns inside one panel
+    panel "Deployment Details" do
+      # Single row table with labeled columns to fit one line
+      table_for [resource] do
+        column("Name") { |dep| dep.name }
+        column("Description") { |dep| dep.description.presence || status_tag('empty', type: :warning) }
+        column("Partner Product") { |dep| dep.partner_product_id.presence || status_tag('empty', type: :warning) }
+        column("Build Prefix") { |dep| dep.build_prefix.presence || status_tag('empty', type: :warning) }
+        column("Build Suffix") { |dep| dep.build_suffix.presence || status_tag('empty', type: :warning) }
+        column("Active Devices") { |dep| dep.devices.where.not(last_heartbeat_recd_time: nil).count }
+        column("Created At") { |dep| dep.created_at }
+        column("Updated At") { |dep| dep.updated_at }
+      end
     end
 
     tabs do
