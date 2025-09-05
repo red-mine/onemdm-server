@@ -39,3 +39,9 @@ table.index_table td {
 .index_table td.col-actions {
   width: 140px; // gives enough space for the three links
 }
+
+// OTA Configurations have extra links (Duplicate/Advance/Pause/Resume)
+#index_table_ota_configurations th.col-actions,
+#index_table_ota_configurations td.col-actions {
+  width: 280px;
+}
