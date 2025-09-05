@@ -2,6 +2,9 @@
 ActiveAdmin.register Device do
   menu priority: 5, label: "Devices"
 
+  # Devices are registered automatically; disable manual creation via admin
+  actions :all, except: [:new, :create]
+
   # 允许的参数（保留原样）
   permit_params :model, :unique_id, :deployment_id, :serial_no, :finger_print, :imei_number, :os_version, :client_version, :gcm_token, :group_id
 
