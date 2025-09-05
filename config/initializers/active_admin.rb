@@ -175,10 +175,8 @@ ActiveAdmin.setup do |config|
 
   # == Removing Breadcrumbs
   #
-  # Breadcrumbs are enabled by default. You can customize them for individual
-  # resources or you can disable them globally from here.
-  #
-  # config.breadcrumb = false
+  # Hide the "ADMIN / …" trail across all admin pages
+  config.breadcrumb = false
 
   # == Register Stylesheets & Javascripts
   #
