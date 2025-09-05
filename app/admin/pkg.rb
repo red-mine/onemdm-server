@@ -9,6 +9,17 @@ ActiveAdmin.register Pkg do
 
   controller do
     before_action { @page_title = "OTA Packages" }
+
+    def destroy
+      pkg = resource
+      if OtaConfiguration.where(pkg_id: pkg.id).exists?
+        redirect_to resource_path, alert: "Cannot delete: used by one or more OTA configurations. Remove those links first."
+        return
+      end
+      super
+    rescue ActiveRecord::InvalidForeignKey
+      redirect_to resource_path, alert: "Cannot delete: package is referenced by OTA configurations."
+    end
   end
 
   # 列表页：Name -> 下载链接（优先 ota_url，其次内部 download 动作）

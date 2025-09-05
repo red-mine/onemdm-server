@@ -3,6 +3,12 @@ class Pkg < ActiveRecord::Base
   default_scope -> { order("name") }
 
   has_many :pkg_batch_installations, dependent: :destroy
+  # Prevent deleting a Pkg while referenced by OTA configurations
+  has_many :ota_configurations,
+           class_name: 'OtaConfiguration',
+           foreign_key: :pkg_id,
+           inverse_of: :pkg,
+           dependent: :restrict_with_error
 
   validates :name, :finger_print, presence: true
 

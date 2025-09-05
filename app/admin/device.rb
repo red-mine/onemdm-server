@@ -178,7 +178,7 @@ ActiveAdmin.register Device do
       row "FingerPrint Parsed" do |d|
         pf = FP_CACHE.call(d.finger_print)
         if pf.blank?
-          status_tag "Invalid FP", :warning
+          status_tag "Invalid FP", type: :warning
         else
           content_tag(:table, class: "index_table") do
             content_tag(:tbody) do

@@ -66,7 +66,7 @@ ActiveAdmin.register Deployment do
             column :created_at
           end
         else
-          status_tag "No OTA packages found", :warning
+          status_tag "No OTA packages found", type: :warning
         end
 
         div do
@@ -98,6 +98,33 @@ ActiveAdmin.register Deployment do
 
         div do
           link_to "Create Group for this Deployment", new_admin_group_path(deployment_id: resource.id), class: "button"
+        end
+      end
+
+      tab "Assignments" do
+        assignments = OtaConfigurationAssignment
+                        .includes(:ota_configuration, :group)
+                        .joins(:ota_configuration)
+                        .where(ota_configurations: { deployment_id: resource.id })
+
+        if assignments.exists?
+          table_for assignments do
+            column(:group) { |a| link_to a.group.name, admin_group_path(a.group) }
+            column(:ota_configuration) { |a| link_to a.ota_configuration.name, admin_ota_configuration_path(a.ota_configuration) }
+            column :created_at
+            column(:actions) do |a|
+              links = []
+              links << link_to('Delete', admin_ota_configuration_assignment_path(a), method: :delete,
+                                data: { confirm: 'Remove this assignment?' })
+              safe_join(links, ' | '.html_safe)
+            end
+          end
+        else
+          status_tag 'No assignments yet', type: :warning
+        end
+
+        div do
+          link_to 'New Assignment', new_admin_ota_configuration_assignment_path(deployment_id: resource.id), class: 'button'
         end
       end
     end
