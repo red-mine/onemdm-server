@@ -5,7 +5,7 @@ ActiveAdmin.register_page "Dashboard" do
 
   # Rename visible title/breadcrumb from "Dashboard" to "Deployments"
   breadcrumb do
-    [link_to("Deployments", admin_dashboard_path)]
+    [link_to("Deployments", "/admin/deployments")]
   end
 
   content title: "Deployments" do

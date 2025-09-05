@@ -13,7 +13,7 @@ ActiveAdmin.setup do |config|
   # users to your main site. Defaults to no link.
   #
   # Clicking the header title (e.g., "tes-tec …") opens the Admin dashboard.
-  config.site_title_link = "/admin/dashboard"
+  config.site_title_link = "/admin/deployments"
 
   # Set an optional image to be displayed for the header
   # instead of a string (overrides :site_title)

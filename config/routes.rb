@@ -4,7 +4,10 @@ Rails.application.routes.draw do
   devise_for :admin_users, ActiveAdmin::Devise.config
 
   # Ensure /admin always shows the dashboard (even if ActiveAdmin config changes)
-  get '/admin', to: redirect('/admin/dashboard')
+  get '/admin', to: redirect('/admin/deployments')
+
+  # Alias the dashboard to /admin/deployments (overrides AA's deployments index route)
+  get '/admin/deployments', to: 'admin/dashboard#index'
 
   post 'heartbeats', to: 'heartbeats#create', :defaults => { :format => :json }
   post '/app_installations/installed', :defaults => { :format => :json }
@@ -15,8 +18,8 @@ Rails.application.routes.draw do
   # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
-  # Redirect app root to the ActiveAdmin dashboard
-  root to: redirect('/admin/dashboard', status: 302)
+  # Redirect app root to the ActiveAdmin dashboard at /admin/deployments
+  root to: redirect('/admin/deployments', status: 302)
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
