@@ -59,6 +59,46 @@ ActiveAdmin.register Deployment do
     end
 
     tabs do
+      # Preferred order: Assignments → Device Groups → OTA Configurations → OTA Packages → Devices
+      tab "Assignments" do
+        assignments = OtaConfigurationAssignment
+                        .includes(:ota_configuration, :group)
+                        .joins(:ota_configuration)
+                        .where(ota_configurations: { deployment_id: resource.id })
+
+        if assignments.exists?
+          table_for assignments do
+            column(:group) { |a| link_to a.group.name, admin_group_path(a.group) }
+            column(:ota_configuration) { |a| link_to a.ota_configuration.name, admin_ota_configuration_path(a.ota_configuration) }
+            column :created_at
+            column(:actions) do |a|
+              links = []
+              links << link_to('Delete', admin_ota_configuration_assignment_path(a), method: :delete,
+                                data: { confirm: 'Remove this assignment?' })
+              safe_join(links, ' | '.html_safe)
+            end
+          end
+        else
+          status_tag 'No assignments yet', type: :warning
+        end
+
+        div do
+          link_to 'New Assignment', new_admin_ota_configuration_assignment_path(deployment_id: resource.id), class: 'button'
+        end
+      end
+
+      tab "Device Groups" do
+        table_for resource.groups do
+          column(:name) { |g| link_to g.name, admin_group_path(g) }
+          column :description
+          column("Devices") { |g| g.devices.count }
+        end
+
+        div do
+          link_to "Create Group for this Deployment", new_admin_group_path(deployment_id: resource.id), class: "button"
+        end
+      end
+
       tab "OTA Configurations" do
         table_for resource.ota_configurations.order(:name) do
           column(:name) { |cfg| link_to cfg.name, admin_ota_configuration_path(cfg) }
@@ -112,45 +152,6 @@ ActiveAdmin.register Deployment do
           column :client_version
           column :last_heartbeat_recd_time
           column(:show) { |d| link_to "View", admin_device_path(d) }
-        end
-      end
-
-      tab "Device Groups" do
-        table_for resource.groups do
-          column(:name) { |g| link_to g.name, admin_group_path(g) }
-          column :description
-          column("Devices") { |g| g.devices.count }
-        end
-
-        div do
-          link_to "Create Group for this Deployment", new_admin_group_path(deployment_id: resource.id), class: "button"
-        end
-      end
-
-      tab "Assignments" do
-        assignments = OtaConfigurationAssignment
-                        .includes(:ota_configuration, :group)
-                        .joins(:ota_configuration)
-                        .where(ota_configurations: { deployment_id: resource.id })
-
-        if assignments.exists?
-          table_for assignments do
-            column(:group) { |a| link_to a.group.name, admin_group_path(a.group) }
-            column(:ota_configuration) { |a| link_to a.ota_configuration.name, admin_ota_configuration_path(a.ota_configuration) }
-            column :created_at
-            column(:actions) do |a|
-              links = []
-              links << link_to('Delete', admin_ota_configuration_assignment_path(a), method: :delete,
-                                data: { confirm: 'Remove this assignment?' })
-              safe_join(links, ' | '.html_safe)
-            end
-          end
-        else
-          status_tag 'No assignments yet', type: :warning
-        end
-
-        div do
-          link_to 'New Assignment', new_admin_ota_configuration_assignment_path(deployment_id: resource.id), class: 'button'
         end
       end
     end
