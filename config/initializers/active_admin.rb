@@ -114,8 +114,8 @@ ActiveAdmin.setup do |config|
   # Set the action to call for the root path. You can set different
   # roots for each namespace.
   #
-  # Default root points to Dashboard. To mimic GOTA, land on Deployments.
-  config.root_to = 'deployments#index'
+  # Default root points to Dashboard. Keep the default dashboard as landing page.
+  config.root_to = 'dashboard#index'
 
   # == Admin Comments
   #
