@@ -157,8 +157,9 @@ ActiveAdmin.register Device do
 
   # ===== Sidebar helper note =====
   sidebar "Batch Tips", only: :index do
-    para "Pick a group name; each selected device is assigned to the group with the same name in its own deployment. " \
-         "Use the Deployment filter to narrow names. Devices without a same-name group are skipped."
+    para "Choose a group name — each device is assigned to a group with the same name in its own deployment. " \
+         "When you open ‘Assign Group Selected’, the list shows only names assignable to all selected devices. " \
+         "If none are available, refine your selection or filter by Deployment."
   end
 
   # ===== 状态 scope（保留原样） =====
@@ -275,5 +276,21 @@ ActiveAdmin.register Device do
     column(:last_heartbeat_recd_time)
     column(:created_at)
     column("group") { |d| d.group&.name }
+  end
+
+  # JSON endpoint used by admin JS to populate assignable groups
+  # based on the currently selected device IDs. It returns the
+  # intersection of group names across the selected devices' deployments.
+  collection_action :assignable_group_names, method: :post do
+    ids = Array(params[:ids]).map(&:to_s)
+    deployments = Device.where(id: ids).distinct.pluck(:deployment_id).compact
+    names = []
+    if deployments.present?
+      pairs = Group.where(deployment_id: deployments).pluck(:deployment_id, :name)
+      names_by_dep = pairs.group_by { |d, _| d }.transform_values { |arr| arr.map { |_, n| n }.uniq }
+      names = names_by_dep.values.reduce(nil) { |acc, arr| acc ? (acc & arr) : arr } || []
+      names = names.sort
+    end
+    render json: { names: names }
   end
 end
