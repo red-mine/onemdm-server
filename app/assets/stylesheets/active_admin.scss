@@ -33,3 +33,9 @@ table.index_table td {
 }
 
 // Non-variable overrides continue below
+
+// Ensure there is room for "View Edit Delete" links
+.index_table th.col-actions,
+.index_table td.col-actions {
+  width: 140px; // gives enough space for the three links
+}
