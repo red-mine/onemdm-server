@@ -3,9 +3,9 @@ ActiveAdmin.register_page "Dashboard" do
   # Hide from the top navigation; keep the page available at /admin/dashboard
   menu false
 
-  # Hide breadcrumb on the front page (provide an empty breadcrumb builder)
+  # Rename visible title/breadcrumb from "Dashboard" to "Deployments"
   breadcrumb do
-    []
+    [link_to("Deployments", "/admin/deployments")]
   end
 
   content title: "Deployments" do
