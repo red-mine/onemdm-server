@@ -3,7 +3,12 @@ ActiveAdmin.register_page "Dashboard" do
   # Hide from the top navigation; keep the page available at /admin/dashboard
   menu false
 
-  content title: proc { I18n.t("active_admin.dashboard") } do
+  # Rename visible title/breadcrumb from "Dashboard" to "Deployments"
+  breadcrumb do
+    [link_to("Deployments", admin_dashboard_path)]
+  end
+
+  content title: "Deployments" do
     # === Deployments（基于新表）的快速入口 ===
     panel "Deployments (new)" do
       deployments = Deployment.order(:name).select(:id, :name)
