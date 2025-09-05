@@ -51,15 +51,15 @@ ActiveAdmin.register Device do
   end
 
   group_data = lambda do
-    # ActiveAdmin does not provide selected IDs when rendering the dialog.
-    # Populate by current deployment filter if present; otherwise show all groups.
+    # Show distinct group names; assignment will resolve to the
+    # device's own deployment group with the same name.
     dep_id = params.dig(:q, :deployment_id_eq)
-    groups = if dep_id.present?
-               Group.where(deployment_id: dep_id).order(:name).pluck(:name, :id)
-             else
-               Group.order(:name).pluck(:name, :id)
-             end
-    { "Group Name" => groups }
+    names = if dep_id.present?
+              Group.where(deployment_id: dep_id).order(:name).distinct.pluck(:name)
+            else
+              Group.order(:name).distinct.pluck(:name)
+            end
+    { "Group Name" => names }
   end
 
   batch_action :push_apps, confirm: "Select apps to push", form: app_data do |ids, inputs|
@@ -85,26 +85,27 @@ ActiveAdmin.register Device do
   end
 
   batch_action :assign_group, confirm: "Select Group to assign", form: group_data do |ids, inputs|
-    devices = Device.where(id: ids)
-    dep_ids = devices.distinct.pluck(:deployment_id).compact
-    if dep_ids.size != 1
-      redirect_to collection_path, alert: "Please select devices from the same deployment." and next
-    end
-    deployment_id = dep_ids.first
-
-    group_id = inputs["Group Name"].presence
-    unless group_id
-      redirect_to collection_path, alert: "Please select a group." and next
+    group_name = inputs["Group Name"].presence
+    unless group_name
+      redirect_to collection_path, alert: "Please select a group name." and next
     end
 
-    group = Group.find(group_id)
-    unless group.deployment_id == deployment_id
-      redirect_to collection_path, alert: "Selected group does not belong to the devices' deployment." and next
+    updated = 0
+    skipped = 0
+    Device.where(id: ids).find_each do |device|
+      next unless device.deployment_id.present?
+      target = Group.find_by(name: group_name, deployment_id: device.deployment_id)
+      if target
+        device.update_columns(group_id: target.id, updated_at: Time.current)
+        updated += 1
+      else
+        skipped += 1
+      end
     end
 
-    # update_all 不触发回调；如果你需要回调/审计，可改为 find_each + update!
-    devices.update_all(group_id: group.id, updated_at: Time.current)
-    redirect_to collection_path, notice: "Devices successfully assigned to group #{group.name} (#{ids.size} updated)"
+    msg = "Assigned #{updated} device(s) to '#{group_name}' within their deployments"
+    msg += "; skipped #{skipped} with no matching group" if skipped > 0
+    redirect_to collection_path, notice: msg
   end
 
   index do
@@ -156,9 +157,8 @@ ActiveAdmin.register Device do
 
   # ===== Sidebar helper note =====
   sidebar "Batch Tips", only: :index do
-    para "Assign Group requires all selected devices to be in the same deployment. " \
-         "The dropdown shows groups in the current Deployment filter; without a filter it lists all groups. " \
-         "If selections span deployments, submission will be rejected."
+    para "Pick a group name; each selected device is assigned to the group with the same name in its own deployment. " \
+         "Use the Deployment filter to narrow names. Devices without a same-name group are skipped."
   end
 
   # ===== 状态 scope（保留原样） =====
