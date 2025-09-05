@@ -1,6 +1,7 @@
 ActiveAdmin.register_page "Pkg Usage" do
 
-  menu parent: :ota_packages_menu, priority: 2, label: "OTA Usage"
+  # Hide global OTA Usage; use per-deployment flows instead
+  menu false
 
   content title: "OTA Usage" do
     pkg_usage_data = []

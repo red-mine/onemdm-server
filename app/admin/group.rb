@@ -1,5 +1,6 @@
 ActiveAdmin.register Group do
-  menu parent: "Devices", priority: 4, label: "Groups"
+  # Hide global Groups list; manage via Deployment tabs
+  menu false
 
   permit_params :name, :deployment_id, :description
 

@@ -1,6 +1,7 @@
 # app/admin/devices.rb
 ActiveAdmin.register Device do
-  menu priority: 5, label: "Devices"
+  # Hide global Devices list to encourage per-deployment navigation
+  menu false
 
   # Devices are registered automatically; disable manual creation via admin
   actions :all, except: [:new, :create]

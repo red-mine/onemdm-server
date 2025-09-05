@@ -1,6 +1,7 @@
 # app/admin/pkgs.rb
 ActiveAdmin.register Pkg do
-  menu priority: 3, label: "OTA Packages", id: :ota_packages_menu
+  # Hide global OTA Packages list; access via Deployment > OTA Packages
+  menu false
   permit_params :name, :finger_print
   
   # 允许从 Deployment/Dashboard 带参跳转做模糊过滤
