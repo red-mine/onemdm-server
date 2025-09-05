@@ -33,16 +33,7 @@ ActiveAdmin.register_page "Dashboard" do
       # New Deployment action intentionally hidden to keep creation restricted
     end
 
-    panel "Device Status" do
-      columns do
-        STATUS_CLASSES.keys.each do |status|
-          column span: 1 do
-            span status.to_s.titleize
-            span link_to(Device.send(status).count, admin_devices_path(scope: status.to_s))
-          end
-        end
-      end
-    end
+    # Device Status panel hidden on front page
 
     # panel "Recent Pushes for App" do
     #   table_for AppBatchInstallation.order('id desc').limit(10) do
@@ -61,21 +52,6 @@ ActiveAdmin.register_page "Dashboard" do
     #   end
     # end
 
-    panel "Recent Pushes for OTA" do
-      table_for PkgBatchInstallation.order('id desc').limit(10) do
-        column("Pushed on", &:created_at)
-        column("OTA Name") { |batch| batch.pkg.name }
-        column("# Devices")   { |b| link_to b.pkg_installations.count, admin_devices_path(q: { pkg_installations_pkg_batch_installation_id_eq: b.id }) }
-        column("# Installed") { |b| link_to b.pkg_installations.installed.count, admin_devices_path(q: { pkg_installations_pkg_batch_installation_id_eq: b.id, installations_status_eq: PkgInstallation.statuses[:installed] }) }
-        column("# Cancelled") { |b| link_to b.pkg_installations.cancelled.count, admin_devices_path(q: { pkg_installations_pkg_batch_installation_id_eq: b.id, installations_status_eq: PkgInstallation.statuses[:cancelled] }) }
-        column("# Pending")   { |b| link_to(b.pkg_installations.pushed.count + b.pkg_installations.downloaded.count, admin_devices_path(q: { pkg_installations_pkg_batch_installation_id_eq: b.id, installations_status_in: [PkgInstallation.statuses[:pushed], PkgInstallation.statuses[:downloaded]] })) }
-        column "% Success" do |b|
-          total = b.pkg_installations.count
-          installed = b.pkg_installations.installed.count
-          pct = total.zero? ? 0.0 : (installed.to_f / total * 100.0)
-          number_to_percentage(pct, precision: 1)
-        end
-      end
-    end
+    # Recent Pushes for OTA panel hidden on front page
   end
 end
