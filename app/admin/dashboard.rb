@@ -30,9 +30,7 @@ ActiveAdmin.register_page "Dashboard" do
         column(:actions) { |dep| link_to('View', admin_deployment_path(dep)) }
       end
 
-      div do
-        link_to "New Deployment", new_admin_deployment_path, class: "button"
-      end
+      # New Deployment action intentionally hidden to keep creation restricted
     end
 
     panel "Device Status" do

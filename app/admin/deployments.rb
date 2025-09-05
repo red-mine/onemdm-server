@@ -8,6 +8,12 @@ ActiveAdmin.register Deployment do
     link_to 'Back to Dashboard', admin_dashboard_path
   end
 
+  # Provide a low‑profile entry point to create a new deployment
+  # while keeping "New" hidden from the combined Deployments page.
+  action_item :new_deployment, only: :show do
+    link_to 'New Deployment', new_admin_deployment_path
+  end
+
   permit_params :name, :description, :build_prefix, :build_suffix, :partner_product_id
 
   filter :name_cont, label: "Name contains"
