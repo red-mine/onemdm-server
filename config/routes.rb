@@ -12,8 +12,8 @@ Rails.application.routes.draw do
   # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
-  # Land on ActiveAdmin dashboard by default
-  root 'admin/dashboard#index'
+  # Land on Deployments like GOTA
+  root 'admin/deployments#index'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

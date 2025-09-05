@@ -13,7 +13,7 @@ ActiveAdmin.setup do |config|
   # users to your main site. Defaults to no link.
   #
   # Clicking the header title (e.g., "tes-tec …") opens the Admin dashboard.
-  config.site_title_link = "/admin"
+  config.site_title_link = "/admin/dashboard"
 
   # Set an optional image to be displayed for the header
   # instead of a string (overrides :site_title)
@@ -115,8 +115,8 @@ ActiveAdmin.setup do |config|
   # Set the action to call for the root path. You can set different
   # roots for each namespace.
   #
-  # Default root points to Dashboard. Keep the default dashboard as landing page.
-  config.root_to = 'dashboard#index'
+  # Default root: go to Deployments like GOTA.
+  config.root_to = 'deployments#index'
 
   # == Admin Comments
   #
