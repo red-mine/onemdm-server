@@ -3,6 +3,8 @@ class Device < ActiveRecord::Base
   belongs_to :group, optional: true
   belongs_to :deployment, optional: true
 
+  before_validation :assign_deployment_from_finger_print, if: :should_autoset_deployment?
+
   attr_accessor :status
 
   validates :unique_id, :model, :gcm_token, presence: true
@@ -54,5 +56,23 @@ class Device < ActiveRecord::Base
                        usage: value}
     end
     app_usage_data
+  end
+
+  private
+
+  # Auto assign deployment when one can be derived from the finger_print header.
+  # This mirrors the historic data backfill that keyed deployments off the
+  # "brand/product/device" segment that precedes the first ":".
+  def assign_deployment_from_finger_print
+    short_key = finger_print.to_s.split(":").first&.strip
+    return if short_key.blank?
+
+    self.deployment = Deployment.find_or_create_by(name: short_key)
+  end
+
+  def should_autoset_deployment?
+    finger_print.present? &&
+      (new_record? || deployment_id_was.blank? || will_save_change_to_finger_print?) &&
+      deployment_id.blank?
   end
 end
